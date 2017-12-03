@@ -27,13 +27,34 @@ def betweenness_centrality(G):
 	return nx.betweenness_centrality(G)
 
 
+# Diameter of largest component
 def diameter(G):
+	if connected_components_count(G) > 1:
+		nodes = max(nx.connected_components(G), key=len)
+
+		new_G = nx.Graph()
+
+		for edge in G.edges():
+			if edge[0] in nodes and edge[1] in nodes:
+				new_G.add_edge(edge[0], edge[1])
+
+		G = new_G
+	
 	return nx.diameter(G)
 
 
 def mean_degree(G):
 	degrees = G.degree()
 	return sum(degrees.values())/len(degrees)
+
+
+def mean_neighbor_degree_per_node(G):
+	return nx.average_neighbor_degree(G)
+
+
+def mean_neighbor_degree(G):
+	neighbor_degrees = mean_neighbor_degree_per_node(G)
+	return sum(neighbor_degrees.values())/len(neighbor_degrees)
 
 
 def global_clustering_coefficient(G):
@@ -51,12 +72,19 @@ def connected_components_count(G):
 	return nx.number_connected_components(G)
 
 
+def largest_component(G):
+	return len(max(nx.connected_components(G), key=len))
+
+
 # Skip assortativity for now as we dont have labeled nodes
 def assortativity(G):
 	pass
 
 
 if __name__ == "__main__":
-	pass
+	G = random_graphs.erdos_renyi(500, 0.1)
+	print mean_neighbor_degree(G)
+	print mean_degree(G)
 	
+
 
