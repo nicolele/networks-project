@@ -12,23 +12,7 @@ import random_graphs
 from numpy.random import randint
 from matplotlib import pyplot as plt
 from numpy import std, mean
-
-
-def graph_assortativity(graph):
-    sum1 = 0
-    sum2 = 0
-    sum3 = 0
-    sum4 = 0
-    for degree_i in graph.degrees():
-        sum2 += degree_i**2
-        sum3 += .5*degree_i**3
-        sum4 += .5*degree_i**2
-        for degree_j in graph.degrees():
-            sum1 += degree_i*degree_j
-    sum2 = sum2**2
-    sum4 = sum4**2
-
-    return
+import networkx as nx
 
 def coefficient_of_variation(degree_sequence):
     return std(degree_sequence)/mean(degree_sequence)

@@ -5,7 +5,7 @@ import operator
 import numpy as np
 import networkx as nx
 import random_graphs
-
+from math import sqrt
 
 def sort_centrality(centralities):
 	return sorted(centralities.items(), key=operator.itemgetter(1), reverse=True)
@@ -104,6 +104,14 @@ def joint_degree(G, k_1, k_2):
 def degree_assortativity(G):
 	return nx.degree_assortativity_coefficient(G)
 
+def coefficient_of_variation(G):
+	mean = sum(G.degrees())/len(G.degrees())
+	sd = 0
+	for degree_k in G.degrees():
+		sd += (degree_k-mean)**2
+	sd = sd/(len(G.degrees())-1)
+	sd = sqrt(sd)
+	return sd/mean
 
 if __name__ == "__main__":
 	G = random_graphs.erdos_renyi(500, 0.1)
