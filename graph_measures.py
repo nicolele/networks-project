@@ -101,10 +101,8 @@ def joint_degree(G, k_1, k_2):
 	else:
 		return jDD[str(k_2) + ',' + str(k_1)]
 
-
-# Skip assortativity for now as we dont have labeled nodes
-def assortativity(G):
-	pass
+def degree_assortativity(G):
+	return nx.degree_assortativity_coefficient(G)
 
 
 if __name__ == "__main__":
