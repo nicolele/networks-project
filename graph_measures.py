@@ -26,7 +26,6 @@ def eigenvector_centrality(G):
 def betweenness_centrality(G):
 	return nx.betweenness_centrality(G)
 
-
 # Diameter of largest component
 def diameter(G):
 	if connected_components_count(G) > 1:
@@ -41,7 +40,6 @@ def diameter(G):
 		G = new_G
 	
 	return nx.diameter(G)
-
 
 def mean_degree(G):
 	degrees = G.degree()
@@ -74,6 +72,34 @@ def connected_components_count(G):
 
 def largest_component(G):
 	return len(max(nx.connected_components(G), key=len))
+
+def joint_degree_distribution(G):
+	# returns number of edges connecting nodes of degrees k1 and k2
+	joint_distribution = {}
+	degrees = set(G.degrees())
+	for degree_1 in degrees:
+		for degree_2 in degrees:
+			if str(degree_2)+','+str(degree_1) not in joint_distribution.keys():
+				joint_distribution[str(degree_1)+','+str(degree_2)] = 0
+
+	nodes = G.nodes()
+	for i in range(len(nodes)):
+		for j in range(i+1, len(nodes)):
+			node_i_degree = G.degree[nodes[i]]
+			node_j_degree = G.degree[nodes[j]]
+			if str(node_i_degree) + ',' + str(node_j_degree) in joint_distribution.keys():
+				joint_distribution[str(node_i_degree) + ',' + str(node_j_degree)] += 1
+			else:
+				joint_distribution[str(node_j_degree) + ',' + str(node_i_degree)] += 1
+
+def joint_degree(G, k_1, k_2):
+
+	jDD = joint_degree_distribution(G)
+
+	if str(k_1) + ',' + str(k_2) in jDD.keys():
+		return jDD[str(k_1) + ',' + str(k_2)]
+	else:
+		return jDD[str(k_2) + ',' + str(k_1)]
 
 
 # Skip assortativity for now as we dont have labeled nodes
