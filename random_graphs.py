@@ -24,8 +24,7 @@ def erdos_renyi(n, p):
 # 	A networkx random graph with the above properties
 def configuration_model(degree_sequence, cleaned=False):
 	if sum(degree_sequence)%2 != 0:
-		print ("Cannot create model with odd number of stubs.")
-		exit()
+		degree_sequence[np.random.randint(len(degree_sequence))] += 1
 
 	rg = nx.Graph(nx.configuration_model(degree_sequence))
 	if cleaned:

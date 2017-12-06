@@ -73,15 +73,18 @@ def connected_components_count(G):
 def largest_component(G):
 	return len(max(nx.connected_components(G), key=len))
 
+
 def degree_assortativity(G):
 	return nx.degree_assortativity_coefficient(G)
 
+
 def coefficient_of_variation(G):
-	mean = sum(G.degrees())/len(G.degrees())
+	degrees = G.degree()
+	mean = sum(degrees.values())/len(degrees)
 	sd = 0
-	for degree_k in G.degrees():
+	for degree_k in degrees.values():
 		sd += (degree_k-mean)**2
-	sd = sd/(len(G.degrees())-1)
+	sd = sd/(len(degrees)-1)
 	sd = sqrt(sd)
 	return sd/mean
 
