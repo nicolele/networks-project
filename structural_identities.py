@@ -7,7 +7,7 @@ import graph_measures
 
 
 
-def analyze_structural_identity(rg_generator, trials):
+def analyze_structural_identity(rg_generator, trials, fig):
 	# Not sure how to aggregate this into one graph for many different
 	# degree sequences
 
@@ -34,7 +34,7 @@ def analyze_structural_identity(rg_generator, trials):
 		coefficients_of_variations.append(graph_measures.coefficient_of_variation(G))
 	
 	# Graph results
-	plt.figure(1)
+	plt.figure(fig)
 
 	plt.subplot(334)
 	plt.hist(diameters, 20)
@@ -90,7 +90,7 @@ def planted_partition_generator(n=500, groups=3, pin=-1, pout=-1, predefined_com
 		pin = np.random.rand()
 		if pin < 0.5:
 			pin = 1 - pin
-	if put < 0:
+	if pout < 0:
 		pout = np.random.rand()
 		if pout > 0.5:
 			pout = 1 - pout
@@ -143,17 +143,17 @@ def configuration_model_generator(n=500, max_degree=-1, fixed_sequence = []):
 		max_degree = np.random.randint(1, 50)
 	#print max_degree
 
-	degree_sequence = np.random.randint(1, max_degree, size=n)
+	degree_sequence = np.random.randint(0, max_degree, size=n)
 	return random_graphs.configuration_model(degree_sequence, cleaned=True)
 
 
 
 if __name__ == "__main__":
-	analyze_structural_identity(configuration_model_generator, 1000) # Fig 1
-	#analyze_structural_identity(watts_strogatz_generator, 2)
-	#analyze_structural_identity(geometric_generator, 2)
-	#analyze_structural_identity(erdos_renyi_generator, 2)
-	#analyze_structural_identity(barabasi_albert_generator, 2)
-	#analyze_structural_identity(planted_partition_generator, 2) # Figt 6
+	#analyze_structural_identity(configuration_model_generator, 1000, 1) # Fig 1
+	analyze_structural_identity(watts_strogatz_generator, 1000, 2)
+	#analyze_structural_identity(geometric_generator, 1000, 3)
+	#analyze_structural_identity(erdos_renyi_generator, 1000, 4)
+	#analyze_structural_identity(barabasi_albert_generator, 1000, 5)
+	#analyze_structural_identity(planted_partition_generator, 1000, 6) # Figt 6
 
 
