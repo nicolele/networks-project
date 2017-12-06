@@ -112,9 +112,9 @@ def planted_partition_generator(n=500, groups=3, pin=-1, pout=-1, predefined_com
 	return random_graphs.random_partition_model(communities, pin, pout)
 
 
-def barabasi_albert_generator(n=500, c=3):
+def barabasi_albert_generator(n=500, c=-1):
 	if c < 0:
-		c = np.random.randint(20)
+		c = np.random.randint(1, 50)
 	#print c
 	return random_graphs.barabasi_albert_model(n, c)
 
@@ -126,9 +126,9 @@ def geometric_generator(n=500, r=-1):
 	return random_graphs.geometric_model(n, r)
 
 
-def watts_strogatz_generator(n=500, k=3, p=-1):
+def watts_strogatz_generator(n=500, k=-1, p=-1):
 	if k < 0:
-		k = np.random.randint(20)
+		k = np.random.randint(1, 50)
 	if p < 0:
 		p = np.random.rand()
 	#print k, p
@@ -140,7 +140,7 @@ def configuration_model_generator(n=500, max_degree=-1, fixed_sequence = []):
 		return random_graphs.configuration_model(fixed_sequence, cleaned=True)
 	
 	if max_degree < 0:
-		max_degree = np.random.randint(1, n)
+		max_degree = np.random.randint(1, 50)
 	#print max_degree
 
 	degree_sequence = np.random.randint(1, max_degree, size=n)
@@ -149,6 +149,11 @@ def configuration_model_generator(n=500, max_degree=-1, fixed_sequence = []):
 
 
 if __name__ == "__main__":
-	analyze_structural_identity(configuration_model_generator, 25)
+	analyze_structural_identity(configuration_model_generator, 1000) # Fig 1
+	#analyze_structural_identity(watts_strogatz_generator, 2)
+	#analyze_structural_identity(geometric_generator, 2)
+	#analyze_structural_identity(erdos_renyi_generator, 2)
+	#analyze_structural_identity(barabasi_albert_generator, 2)
+	#analyze_structural_identity(planted_partition_generator, 2) # Figt 6
 
 
