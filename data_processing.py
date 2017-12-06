@@ -20,7 +20,7 @@ def remove_edges(g, p):
     edges = g.edges()
     num_edges = g.number_of_edges()
 
-    to_remove = np.floor(edges*p)
+    to_remove = np.floor(num_edges*p)
     
     removed = 0
     while removed <= to_remove:
