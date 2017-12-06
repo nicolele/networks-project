@@ -2,7 +2,6 @@ import networkx as nx
 import numpy as np
 
 
-
 def process_graph_1(file):
     edge_pairs = []
     with open(file) as f:
@@ -13,16 +12,15 @@ def process_graph_1(file):
     g = nx.Graph()
     g.add_edges_from(edge_pairs)
     
-
     return g
 
 
 def remove_edges(g, p):
-    to_remove = np.floor(len(g.edges())*p)
-
     edge_set = set()
     edges = g.edges()
     num_edges = g.number_of_edges()
+
+    to_remove = np.floor(edges*p)
     
     removed = 0
     while removed <= to_remove:
@@ -39,7 +37,6 @@ def remove_edges(g, p):
 def main():
     g = process_graph_1('data/cit-HepPh.txt')
     remove_edges(g, 0.10)
-
 
 
 if __name__ == '__main__':
