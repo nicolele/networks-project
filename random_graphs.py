@@ -76,7 +76,7 @@ def barabasi_albert_model(n, c):
 # More information here
 #	https://networkx.github.io/documentation/networkx-1.10/reference/generated/networkx.generators.random_graphs.watts_strogatz_graph.html#networkx.generators.random_graphs.watts_strogatz_graph
 def watts_strogatz_model(n, k, p):
-	return nx.watts_strogatz_graph(n, k, p)
+	return nx.connected_watts_strogatz_graph(n, k, p)
 
 
 

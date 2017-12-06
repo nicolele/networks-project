@@ -101,7 +101,7 @@ def planted_partition_generator(n=500, groups=3, pin=-1, pout=-1, predefined_com
 		for i in xrange(groups-1):
 			# Add an element of randomness so some graphs have even splits
 			# and some do not
-			c_size = np.random.randint(int(n * np.random.rand()))
+			c_size = np.random.randint(1 + int(n * np.random.rand()))
 			communities.append(c_size)
 			n -= c_size
 		communities.append(n)
@@ -149,8 +149,8 @@ def configuration_model_generator(n=500, max_degree=-1, fixed_sequence = []):
 
 
 if __name__ == "__main__":
-	#analyze_structural_identity(configuration_model_generator, 1000, 1) # Fig 1
-	analyze_structural_identity(watts_strogatz_generator, 1000, 2)
+	analyze_structural_identity(configuration_model_generator, 1000, 1) # Fig 1
+	#analyze_structural_identity(watts_strogatz_generator, 1000, 2)
 	#analyze_structural_identity(geometric_generator, 1000, 3)
 	#analyze_structural_identity(erdos_renyi_generator, 1000, 4)
 	#analyze_structural_identity(barabasi_albert_generator, 1000, 5)

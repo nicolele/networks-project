@@ -80,6 +80,8 @@ def degree_assortativity(G):
 
 def coefficient_of_variation(G):
 	degrees = G.degree()
+	if len(degrees) == 0:
+		return 0
 	mean = sum(degrees.values())/len(degrees)
 	sd = 0
 	for degree_k in degrees.values():
