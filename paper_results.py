@@ -93,25 +93,25 @@ def generate_bounds_degree_sequence_planted_partition(ranges,simulations):
 
 
 # DEGREE SEQUENCE AND GRAPH DIVERSITY
-""" Generate bounds under maximum entropy (Configuration Model) """
-ranges = 1000
-simulations = 10
-mins, maxs = generate_bounds_degree_sequence(ranges, simulations)
-print(mins)
-print(maxs)
-plt.plot(mins)
-plt.plot(maxs)
-plt.title("Bounds for s metric under the configuration model, approximately uniform degree distribution")
-plt.xlabel("number of nodes within graph")
-plt.ylabel("minimum and maximum s metric")
-plt.show()
-
-"""Next we need to define the coefficient of variation"""
-""" Next we are going to verify: For graphs with regular structure that have low variability
-in their degree sequence D, there is typically very little diversity
-in the corresponding space of graphs G( D). """
-
-
-""" Look at Coeff for graphs with a degree sequence having an exponential form"""
-
-""" Look at Coeff for graphs that are scale free"""
+# """ Generate bounds under maximum entropy (Configuration Model) """
+# ranges = 1000
+# simulations = 10
+# mins, maxs = generate_bounds_degree_sequence(ranges, simulations)
+# print(mins)
+# print(maxs)
+# plt.plot(mins)
+# plt.plot(maxs)
+# plt.title("Bounds for s metric under the configuration model, approximately uniform degree distribution")
+# plt.xlabel("number of nodes within graph")
+# plt.ylabel("minimum and maximum s metric")
+# plt.show()
+#
+# """Next we need to define the coefficient of variation"""
+# """ Next we are going to verify: For graphs with regular structure that have low variability
+# in their degree sequence D, there is typically very little diversity
+# in the corresponding space of graphs G( D). """
+#
+#
+# """ Look at Coeff for graphs with a degree sequence having an exponential form"""
+#
+# """ Look at Coeff for graphs that are scale free"""
