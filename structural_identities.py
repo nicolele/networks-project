@@ -147,7 +147,6 @@ def configuration_model_generator(n=500, max_degree=-1, fixed_sequence = []):
 	return random_graphs.configuration_model(degree_sequence, cleaned=True)
 
 
-
 if __name__ == "__main__":
 	analyze_structural_identity(configuration_model_generator, 1000, 1) # Fig 1
 	#analyze_structural_identity(watts_strogatz_generator, 1000, 2)

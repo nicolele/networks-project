@@ -30,7 +30,7 @@ def generate_random_config_model(n, max_degree=None):
 # as it is highly inefficient in memory.
 def generate_multiple_config_models(amt, n, max_degree=None):
 	graphs = []
-	for i in xrange(amt):
+	for i in range(amt):
 		graphs.append(generate_random_config_model(n, max_degree))
 	return graphs
 
@@ -48,7 +48,7 @@ def analyze_structure_for_fixed_degree_seq(n, max_degree=None):
 	largest_component_sizes = []
 
 	degree_sequence = generate_random_degree_sequence(n, max_degree)
-	for i in xrange(500):
+	for i in range(500):
 		G = random_graphs.configuration_model(degree_sequence, cleaned=False)
 		print (i)
 
