@@ -5,11 +5,13 @@ from graph_measures import coefficient_of_variation, global_clustering_coefficie
 from random_graphs import random_partition_model,erdos_renyi, geometric_model, barabasi_albert_model
 from joint_degree_investigation import joint_degree_distribution
 from numpy.linalg import norm
-from numpy.random import choice,uniform
-from math import  floor, sqrt
+from numpy.random import choice,uniform,randint
+from math import floor, sqrt
 from random import sample
 from copy import deepcopy
 import random
+from numpy import linspace
+from matplotlib import pyplot as plt
 
 """" Given a graph that is missing data, lets say it has 500 nodes and we think it will have 
 
@@ -90,25 +92,108 @@ def norm_difference(JDD_1,JDD_2, norm_name):
 
     return norm(M,norm_name)
 
-def simulate_random_graph(graph_name, number_of_nodes):
+def simulate_random_graph(graph_name, number_of_nodes, additional_parameters = None):
+
+    if additional_parameters is not None:
+        keys = additional_parameters.keys()
 
     if graph_name == "random_partition_model":
-        p_in = uniform()
-        p_out = uniform()
-        community_sizes = uniform_partition_gen(2, number_of_nodes, choice(floor(number_of_nodes / 2)))
+        if additional_parameters is not None:
+
+            if 'p_in' in keys:
+                p_in = additional_parameters['p_in']
+            else:
+                p_in = uniform()
+            if 'p_out' in keys:
+                p_out = additional_parameters['p_out']
+            else:
+                p_out = uniform()
+            if 'max_community_sizes' in keys:
+                max_community_sizes = additional_parameters['min_community_sizes']
+            else:
+                max_community_sizes = choice(floor(number_of_nodes / 2))
+            if 'min_community_sizes' in keys:
+                min_community_sizes = additional_parameters['min_community_sizes']
+            else:
+                min_community_sizes = 1
+
+            community_sizes = uniform_partition_gen(min_community_sizes,
+                                        number_of_nodes, max_community_sizes)
+        else:
+            p_out = uniform()
+            p_in = uniform()
+            community_sizes = uniform_partition_gen(1, number_of_nodes, choice(floor(number_of_nodes / 2)))
+
         return random_partition_model(community_sizes, p_in, p_out)
 
     elif graph_name == "erdos_renyi":
-        p = uniform()
+        if additional_parameters is not None:
+            if 'p' in keys:
+                p = additional_parameters['p']
+            else:
+                p = uniform()
+        else:
+            p = uniform()
         return erdos_renyi(number_of_nodes,p)
 
     elif graph_name == "geometric_model":
-        r = floor(sqrt(choice(number_of_nodes))+1)
+        if additional_parameters is not None:
+            if 'r' in keys:
+                r = additional_parameters['r']
+            else:
+                r = floor(sqrt(choice(number_of_nodes)) + 1)
+        else:
+            r = floor(sqrt(choice(number_of_nodes))+1)
         return geometric_model(number_of_nodes,r)
 
     elif graph_name == "barabasi_albert_model":
-        c = choice(floor(number_of_nodes/2))+1
+        if additional_parameters is not None:
+            if 'c' in keys:
+                c = additional_parameters['c']
+            else:
+                c = choice(floor(number_of_nodes / 2)) + 1
+        else:
+            c = choice(floor(number_of_nodes/2))+1
+
         return barabasi_albert_model(number_of_nodes,c)
+
+    else:
+        print('please provide a valid graphical model')
+        return None
+
+def get_charactoristics(graph_name,n):
+
+    if graph_name == "random_partition_model":
+
+        graph_info = {}
+        graph_info['p_in'] = (0,1)
+        graph_info['p_out'] = (0, 1)
+        graph_info['p_out'] = (0, 1)
+        graph_info['min_community_sizes'] = (0, floor(n / 2))
+        graph_info['max_community_sizes'] = (0, floor(n / 2))
+
+        return graph_info
+
+    elif graph_name == "erdos_renyi":
+
+        graph_info = {}
+        graph_info['p'] = (0,1)
+
+        return graph_info
+
+    elif graph_name == "geometric_model":
+
+        graph_info = {}
+        graph_info['r'] = (1,floor(sqrt(n) + 1))
+
+        return graph_info
+
+    elif graph_name == "barabasi_albert_model":
+
+        graph_info = {}
+        graph_info['c'] = (1,floor(n / 2) + 1)
+
+        return graph_info
 
     else:
         print('please provide a valid graphical model')
@@ -117,11 +202,10 @@ def simulate_random_graph(graph_name, number_of_nodes):
 def generate_proposal_JDDs(number_of_nodes, distributions, averaging_per_proposal,
                            representations = None, additional_restrictions = None):
     average_JDD = {}
-    for graph in distributions:
-
-        average_JDD[graph] = None
-        for sim in range(averaging_per_proposal):
-            if (representations is None) and (additional_restrictions is None):
+    if (representations is None) and (additional_restrictions is None):
+        for graph in distributions:
+            average_JDD[graph] = None
+            for sim in range(averaging_per_proposal):
                 simulate = 1
                 while simulate:
                     current_G = simulate_random_graph(graph, number_of_nodes)
@@ -145,15 +229,42 @@ def generate_proposal_JDDs(number_of_nodes, distributions, averaging_per_proposa
                             average_JDD[graph][key] = average_JDD[graph][key]
                         else:
                             average_JDD[graph][key] = 0
-            elif representations is not None:
-                return None
-            elif additional_restrictions is not None:
-                return None
-            else:
-                return None
 
-        for key in average_JDD[graph].keys():
-            average_JDD[graph][key] /= averaging_per_proposal
+    elif representations is not None:
+
+        # if we want to attempt to fit to multiple representations of a random graph, lets try it
+        for distribution in distributions:
+            info = get_charactoristics(distribution, number_of_nodes)
+
+        for graph in distributions:
+            average_JDD[graph] = None
+            for sim in range(averaging_per_proposal):
+                simulate = 1
+                while simulate:
+                    current_G = simulate_random_graph(graph, number_of_nodes)
+                    if len(list(current_G.degree().values())) > 0:
+                        simulate = 0
+
+                total_degrees = max(list(current_G.degree().values()))
+                current_JDD = joint_degree_distribution(current_G, total_degrees)
+
+                if average_JDD[graph] is None:
+                    average_JDD[graph] = current_JDD
+                else:
+                    keys = list(current_JDD.keys()) + list(average_JDD[graph].keys())
+                    keys = set(keys)
+                    for key in keys:
+                        if (key in current_JDD.keys()) and (key in average_JDD[graph].keys()):
+                            average_JDD[graph][key] = current_JDD[key] + average_JDD[graph][key]
+                        elif key in current_JDD.keys():
+                            average_JDD[graph][key] = current_JDD[key]
+                        elif key in average_JDD[graph].keys():
+                            average_JDD[graph][key] = average_JDD[graph][key]
+                        else:
+                            average_JDD[graph][key] = 0
+
+    for key in average_JDD[graph].keys():
+        average_JDD[graph][key] /= averaging_per_proposal
 
     return average_JDD
 
@@ -185,6 +296,7 @@ def edge_imputation_via_one_step_node_norm_minimization(Observered_G, Proposal_d
 
     # generate best proposal graph reconstructions under specific models
     while proposals:
+
         for proposal in proposals:
             current_graph = proposal_graphs[proposal]
             current_missing_edges = nx.non_edges(proposal_graphs[proposal])
@@ -234,6 +346,7 @@ def edge_imputation_via_one_step_node_norm_minimization(Observered_G, Proposal_d
         JDD_1 = joint_degree_distribution(current_graph,total_degrees)
         JDD_2 = Average_JDD[proposal]
         eval = norm_difference(JDD_1, JDD_2, 'fro')
+        print(proposal,eval)
         if eval < best_eval:
             best_proposal = proposal
             best_eval = eval
@@ -241,6 +354,25 @@ def edge_imputation_via_one_step_node_norm_minimization(Observered_G, Proposal_d
 
     return best_proposal, best_eval, best_prediction
 
+
+def remove_edges(g, p):
+    edge_set = set()
+    edges = g.edges()
+    num_edges = g.number_of_edges()
+
+    to_remove = int(floor(num_edges * p))
+
+    removed = 0
+    for i in range(to_remove):
+        random_edge_index = randint(num_edges)
+        edge = edges[random_edge_index]
+        edge_set.add((edge[0], edge[1]))
+        edge_set.add((edge[1], edge[0]))
+        removed += 1
+
+    g.remove_edges_from(list(edge_set))
+
+    return g
 
 # # test 1
 # n = 25
@@ -256,6 +388,7 @@ def edge_imputation_via_one_step_node_norm_minimization(Observered_G, Proposal_d
 # print(generate_proposal_JDDs(20, ['erdos_renyi'], 10))
 # print(generate_proposal_JDDs(20, ['geometric_model'], 10))
 # print(generate_proposal_JDDs(20, ['barabasi_albert_model'], 10))
+
 
 if __name__ == "__main__":
     Proposal_distributions = ['geometric_model','erdos_renyi',
@@ -282,3 +415,32 @@ if __name__ == "__main__":
     print(norm_difference(JDD_gm,JDD_ba, 'fro'))
 
     print(norm_difference(JDD_ba,JDD_ba, 'fro'))
+
+    Proposal_distributions = ['geometric_model','erdos_renyi',
+                    'random_partition_model','barabasi_albert_model']
+    Averaging = 10
+    percent_removed = linspace(0,1,10)
+    plots = []
+    simulations = 2
+
+    # for p in percent_removed:
+    #     counter = 0
+    #     for i in range(simulations):
+    #         Observered_G = remove_edges(barabasi_albert_model(10, 2), p)
+    #         sim = edge_imputation_via_one_step_node_norm_minimization(
+    #             Observered_G, Proposal_distributions, Averaging, 0)
+    #         if sim[0] == 'barabasi_albert_model':
+    #             counter += 1
+    #             print(counter)
+    #     percent_correct = counter/simulations
+    #     plots.append(percent_correct)
+    #
+    # print(plots)
+    # plt.plot(percent_removed,plots)
+    # plt.ylabel('Simulation of Barabasi Albert Model')
+    # plt.show()
+
+
+    # Observered_G = remove_edges(barabasi_albert_model(20,2),.01)
+    Observered_G = remove_edges(erdos_renyi(10, .999),.9)
+    print(edge_imputation_via_one_step_node_norm_minimization(Observered_G, Proposal_distributions, Averaging, 0))
