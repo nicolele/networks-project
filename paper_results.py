@@ -50,10 +50,6 @@ def generate_bounds_degree_sequence(ranges,simulations):
     return min_values, max_values
 
 def get_dd_planted_partition(n, q, c, epsilon):
-    n = 50.
-    q = 2.  # number of groups
-    c = 5.
-    epsilon = [0, 4, 8]
     # generate graphs
     p_in = (1 / n) * (c + epsilon[0] / 2)
     p_out = (1 / n) * (c - epsilon[0] / 2)

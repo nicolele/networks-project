@@ -1,6 +1,3 @@
-
-
-
 import matplotlib.pyplot as plt
 import operator
 import numpy as np
@@ -9,7 +6,7 @@ import random_graphs as rg
 from random import shuffle
 import graph_measures as gm
 from copy import deepcopy
-from scipy.misc import comb
+from random_graphs import configuration_model
 
 def joint_degree_distribution(G,total_degrees):
 
@@ -59,44 +56,6 @@ def feasable_joint_degree_ditributions(proposed_jdd, jdd):
 
     return False
 
-def perm_configuration_model(degree_dist):
-    # generate vector of degrees
-    degree_vector_ = [[jj for ii in range(0,degree_dist[jj])] for jj in range(0,len(degree_dist))]
-    degree_vector = [item for sublist in degree_vector_ for item in sublist]
-    # deep copy current simulation
-    current_simulation = deepcopy(degree_vector)
-    # shuffle current_simulation
-    shuffle(current_simulation)
-    # iteratively pull two vertices and then concatinate them to create graph
-    incomplete = 1; counter = 0; edges = []
-    max_iterations = 100000
-    while incomplete:
-        counter += 1
-        # check if the first start end is not a self loop, or a multi-edge
-        if current_simulation[0] != current_simulation[1] \
-        and (current_simulation[0], current_simulation[1]) not in edges \
-        and (current_simulation[1], current_simulation[0]) not in edges \
-        and current_simulation:
-            # if so add edge to edge list
-            edges.append((current_simulation[0], current_simulation[1]))
-            # remove first two elements chosen
-            del current_simulation[0]
-            del current_simulation[0]
-            # check if you are out of edges
-            if not current_simulation:
-                incomplete = 0
-                # if not, re-shuffle degree list and try again
-            else:
-                shuffle(current_simulation)
-            if counter > max_iterations:
-                incomplete = 0
-            # add simulated graph
-        G_ = nx.Graph()
-        G_.add_nodes_from([ii for ii in range(0,len(degree_dist))])
-        G_.add_edges_from(edges)
-
-    return G_
-
 def jdd_restricted_configuration_model(degree_sequence, jdd):
 
     # basic idea is to create bins, and fill the bins as we connect the sticky ends
@@ -130,7 +89,6 @@ def jdd_restricted_configuration_model(degree_sequence, jdd):
                 compatable = feasable_joint_degree_ditributions(proposed_jdd,jdd)
 
                 if compatable:
-                    print('k')
                     # if so add edge to edge list
                     edges.append((current_simulation[0], current_simulation[1]))
                     generative_graph.add_edge(current_simulation[0], current_simulation[1])

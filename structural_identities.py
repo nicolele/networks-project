@@ -7,7 +7,7 @@ import graph_measures
 
 
 
-def analyze_structural_identity(rg_generator, trials):
+def analyze_structural_identity(rg_generator, trials, fig):
 	# Not sure how to aggregate this into one graph for many different
 	# degree sequences
 
@@ -34,7 +34,7 @@ def analyze_structural_identity(rg_generator, trials):
 		coefficients_of_variations.append(graph_measures.coefficient_of_variation(G))
 	
 	# Graph results
-	plt.figure(1)
+	plt.figure(fig)
 
 	plt.subplot(334)
 	plt.hist(diameters, 20)
@@ -90,7 +90,7 @@ def planted_partition_generator(n=500, groups=3, pin=-1, pout=-1, predefined_com
 		pin = np.random.rand()
 		if pin < 0.5:
 			pin = 1 - pin
-	if put < 0:
+	if pout < 0:
 		pout = np.random.rand()
 		if pout > 0.5:
 			pout = 1 - pout
@@ -101,7 +101,7 @@ def planted_partition_generator(n=500, groups=3, pin=-1, pout=-1, predefined_com
 		for i in xrange(groups-1):
 			# Add an element of randomness so some graphs have even splits
 			# and some do not
-			c_size = np.random.randint(int(n * np.random.rand()))
+			c_size = np.random.randint(1 + int(n * np.random.rand()))
 			communities.append(c_size)
 			n -= c_size
 		communities.append(n)
@@ -112,9 +112,9 @@ def planted_partition_generator(n=500, groups=3, pin=-1, pout=-1, predefined_com
 	return random_graphs.random_partition_model(communities, pin, pout)
 
 
-def barabasi_albert_generator(n=500, c=3):
+def barabasi_albert_generator(n=500, c=-1):
 	if c < 0:
-		c = np.random.randint(20)
+		c = np.random.randint(1, 50)
 	#print c
 	return random_graphs.barabasi_albert_model(n, c)
 
@@ -126,9 +126,9 @@ def geometric_generator(n=500, r=-1):
 	return random_graphs.geometric_model(n, r)
 
 
-def watts_strogatz_generator(n=500, k=3, p=-1):
+def watts_strogatz_generator(n=500, k=-1, p=-1):
 	if k < 0:
-		k = np.random.randint(20)
+		k = np.random.randint(1, 50)
 	if p < 0:
 		p = np.random.rand()
 	#print k, p
@@ -140,15 +140,20 @@ def configuration_model_generator(n=500, max_degree=-1, fixed_sequence = []):
 		return random_graphs.configuration_model(fixed_sequence, cleaned=True)
 	
 	if max_degree < 0:
-		max_degree = np.random.randint(1, n)
+		max_degree = np.random.randint(1, 50)
 	#print max_degree
 
-	degree_sequence = np.random.randint(1, max_degree, size=n)
+	degree_sequence = np.random.randint(0, max_degree, size=n)
 	return random_graphs.configuration_model(degree_sequence, cleaned=True)
 
 
 
 if __name__ == "__main__":
-	analyze_structural_identity(configuration_model_generator, 25)
+	analyze_structural_identity(configuration_model_generator, 1000, 1) # Fig 1
+	#analyze_structural_identity(watts_strogatz_generator, 1000, 2)
+	#analyze_structural_identity(geometric_generator, 1000, 3)
+	#analyze_structural_identity(erdos_renyi_generator, 1000, 4)
+	#analyze_structural_identity(barabasi_albert_generator, 1000, 5)
+	#analyze_structural_identity(planted_partition_generator, 1000, 6) # Figt 6
 
 
