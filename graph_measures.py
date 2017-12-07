@@ -26,6 +26,15 @@ def eigenvector_centrality(G):
 def betweenness_centrality(G):
 	return nx.betweenness_centrality(G)
 
+
+def hi_lo_centrality(centrality, G):
+	centralities = centrality(G)
+	c_max = max(centralities.keys(), key=(lambda k: centralities[k]))
+	c_min = min(centralities.keys(), key=(lambda k: centralities[k]))
+
+	return (centralities[c_min], centralities[c_max])
+
+
 # Diameter of largest component
 def diameter(G):
 	if connected_components_count(G) > 1:
@@ -88,10 +97,9 @@ def coefficient_of_variation(G):
 	sd = sqrt(sd)
 	return sd/mean
 
-#if __name__ == "__main__":
-	#G = random_graphs.erdos_renyi(500, 0.1)
-	#print(mean_neighbor_degree(G))
-	#print(mean_degree(G))
+# if __name__ == "__main__":
+# 	G = random_graphs.erdos_renyi(500, 0.1)
+# 	print hi_lo(betweenness_centrality, G)
 	
 
 
