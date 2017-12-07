@@ -262,36 +262,35 @@ Proposal_distributions = ['geometric_model','erdos_renyi',
 #
 
 Averaging = 10
-percent_removed = linspace(0.01,.99,25)
-simulations = 10
-nodes = 10
+percent_removed = linspace(0.01,.99,20)
+simulations = 15
 
-for nodes in [5,10,50,100]:
-    for Averaging in [5,10,50,100]:
-        plots = []
-        for p in percent_removed:
-            counter = 0
-            for i in range(simulations):
-                remove = 1
-                while remove:
-                    G = simulate_random_graph('barabasi_albert_model', nodes)
-                    Observered_G = remove_edges(G, p)
-                    if Observered_G:
-                        remove = 0
-                        sim = edge_imputation_via_one_step_node_norm_minimization(
-                        Observered_G, Proposal_distributions, Averaging, 0)
-                        if sim[0] == 'barabasi_albert_model':
-                            counter += 1
-            percent_correct = counter/simulations
-            plots.append(percent_correct)
-
-
-        plt.plot(percent_removed,plots)
-        plt.title('Simulation of barabasi_albert_model')
-        plt.ylabel('percent correct')
-        plt.xlabel('percent held out')
-        plt.savefig('barabasi_albert_model' + str(Averaging) + str(nodes))
-
+for nodes in [10]:
+    # for Averaging in [10]:
+    #     plots = []
+    #     for p in percent_removed:
+    #         counter = 0
+    #         for i in range(simulations):
+    #             remove = 1
+    #             while remove:
+    #                 G = simulate_random_graph('barabasi_albert_model', nodes)
+    #                 Observered_G = remove_edges(G, p)
+    #                 if Observered_G:
+    #                     remove = 0
+    #                     sim = edge_imputation_via_one_step_node_norm_minimization(
+    #                     Observered_G, Proposal_distributions, Averaging, 0)
+    #                     if sim[0] == 'barabasi_albert_model':
+    #                         counter += 1
+    #         percent_correct = counter/simulations
+    #         plots.append(percent_correct)
+    #
+    #
+    #     plt.plot(percent_removed,plots)
+    #     plt.title('Simulation of barabasi_albert_model')
+    #     plt.ylabel('percent correct')
+    #     plt.xlabel('percent held out')
+    #     plt.savefig('barabasi_albert_model' + str(Averaging) + str(nodes))
+    #     plt.close()
 
         plots = []
         for p in percent_removed:
@@ -315,6 +314,7 @@ for nodes in [5,10,50,100]:
         plt.ylabel('percent correct')
         plt.xlabel('percent held out')
         plt.savefig('erdos_renyi' + str(Averaging) + str(nodes))
+        plt.close()
 
         plots = []
         for p in percent_removed:
@@ -338,6 +338,7 @@ for nodes in [5,10,50,100]:
         plt.ylabel('percent correct')
         plt.xlabel('percent held out')
         plt.savefig('random_partition_model' + str(Averaging) + str(nodes))
+        plt.close()
 
         plots = []
         for p in percent_removed:
@@ -361,3 +362,4 @@ for nodes in [5,10,50,100]:
         plt.ylabel('percent correct')
         plt.xlabel('percent held out')
         plt.savefig('geometric_model' + str(Averaging) + str(nodes))
+        plt.close()
