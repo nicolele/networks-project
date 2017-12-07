@@ -155,7 +155,7 @@ def geometric_generator(n=500, r=-1):
 
 def watts_strogatz_generator(n=500, k=-1, p=-1):
 	if k < 0:
-		k = np.random.randint(1, 50)
+		k = np.random.randint(5, 25)
 	if p < 0:
 		p = np.random.rand()
 	#print k, p
@@ -167,7 +167,7 @@ def configuration_model_generator(n=500, max_degree=-1, fixed_sequence = []):
 		return random_graphs.configuration_model(fixed_sequence, cleaned=True)
 	
 	if max_degree < 0:
-		max_degree = np.random.randint(2, 50)
+		max_degree = np.random.randint(2, 100)
 	#print max_degree
 
 	degree_sequence = np.random.randint(1, max_degree, size=n)
@@ -186,6 +186,7 @@ def satisfies_constraints(G, constraints):
 			return False
 
 	return True
+
 
 # Constraints is a dictionary
 def constrained_generation(generator_function, constraints):

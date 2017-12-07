@@ -256,27 +256,29 @@ def edge_imputation_via_one_step_node_norm_minimization(Observered_G, Proposal_d
 # print(generate_proposal_JDDs(20, ['erdos_renyi'], 10))
 # print(generate_proposal_JDDs(20, ['geometric_model'], 10))
 # print(generate_proposal_JDDs(20, ['barabasi_albert_model'], 10))
-Proposal_distributions = ['geometric_model','erdos_renyi',
-                'random_partition_model','barabasi_albert_model']
-Averaging = 100
-Observered_G = barabasi_albert_model(10,2)
-print(edge_imputation_via_one_step_node_norm_minimization(Observered_G, Proposal_distributions, Averaging, 0))
 
-JDD_rp = generate_proposal_JDDs(10, ['random_partition_model'], 1000)
-JDD_er = generate_proposal_JDDs(10, ['erdos_renyi'], 1000)
-JDD_gm = generate_proposal_JDDs(10, ['geometric_model'], 1000)
-JDD_ba = generate_proposal_JDDs(10, ['barabasi_albert_model'], 1000)
+if __name__ == "__main__":
+    Proposal_distributions = ['geometric_model','erdos_renyi',
+                    'random_partition_model','barabasi_albert_model']
+    Averaging = 100
+    Observered_G = barabasi_albert_model(10,2)
+    print(edge_imputation_via_one_step_node_norm_minimization(Observered_G, Proposal_distributions, Averaging, 0))
 
-print(norm_difference(JDD_rp,JDD_rp, 'fro'))
-print(norm_difference(JDD_rp,JDD_er, 'fro'))
-print(norm_difference(JDD_rp,JDD_gm, 'fro'))
-print(norm_difference(JDD_rp,JDD_ba, 'fro'))
+    JDD_rp = generate_proposal_JDDs(10, ['random_partition_model'], 1000)
+    JDD_er = generate_proposal_JDDs(10, ['erdos_renyi'], 1000)
+    JDD_gm = generate_proposal_JDDs(10, ['geometric_model'], 1000)
+    JDD_ba = generate_proposal_JDDs(10, ['barabasi_albert_model'], 1000)
 
-print(norm_difference(JDD_er,JDD_er, 'fro'))
-print(norm_difference(JDD_er,JDD_gm, 'fro'))
-print(norm_difference(JDD_er,JDD_ba, 'fro'))
+    print(norm_difference(JDD_rp,JDD_rp, 'fro'))
+    print(norm_difference(JDD_rp,JDD_er, 'fro'))
+    print(norm_difference(JDD_rp,JDD_gm, 'fro'))
+    print(norm_difference(JDD_rp,JDD_ba, 'fro'))
 
-print(norm_difference(JDD_gm,JDD_gm, 'fro'))
-print(norm_difference(JDD_gm,JDD_ba, 'fro'))
+    print(norm_difference(JDD_er,JDD_er, 'fro'))
+    print(norm_difference(JDD_er,JDD_gm, 'fro'))
+    print(norm_difference(JDD_er,JDD_ba, 'fro'))
 
-print(norm_difference(JDD_ba,JDD_ba, 'fro'))
+    print(norm_difference(JDD_gm,JDD_gm, 'fro'))
+    print(norm_difference(JDD_gm,JDD_ba, 'fro'))
+
+    print(norm_difference(JDD_ba,JDD_ba, 'fro'))
