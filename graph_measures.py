@@ -7,6 +7,8 @@ import networkx as nx
 import random_graphs
 from math import sqrt
 
+
+
 def sort_centrality(centralities):
 	return sorted(centralities.items(), key=operator.itemgetter(1), reverse=True)
 
@@ -49,6 +51,7 @@ def diameter(G):
 		G = new_G
 	
 	return nx.diameter(G)
+
 
 def mean_degree(G):
 	degrees = G.degree()
