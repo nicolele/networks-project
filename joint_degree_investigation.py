@@ -12,7 +12,7 @@ def joint_degree_distribution(G,total_degrees):
 
     # returns number of edges connecting nodes of degrees k1 and k2
     joint_distribution = {}
-    degrees = list(range(0,total_degrees))
+    degrees = list(range(0,total_degrees+1))
 
     if len(degrees) > 1:
         for degree_1 in degrees:
@@ -136,21 +136,21 @@ def draw_graph(G,title):
     plt.title(title)
     plt.show()
 
-# now lets test this on a few models
-
-Graph_1 = rg.barabasi_albert_model(10,2)
-
-degree_sequence = sorted(nx.degree(Graph_1).values(),reverse=True)
-joint_degree_dist = joint_degree_distribution(Graph_1, max(degree_sequence)+1)
-print(sum(degree_sequence))
-generated_graph = jdd_restricted_configuration_model(degree_sequence, joint_degree_dist)
-
-print(joint_degree_distribution(generated_graph, max(degree_sequence)+1))
-print(joint_degree_distribution(Graph_1, max(degree_sequence)+1))
-
-draw_graph(Graph_1,'fdf')
-
-draw_graph(generated_graph,'dsfds')
+# # now lets test this on a few models
+#
+# Graph_1 = rg.barabasi_albert_model(10,2)
+#
+# degree_sequence = sorted(nx.degree(Graph_1).values(),reverse=True)
+# joint_degree_dist = joint_degree_distribution(Graph_1, max(degree_sequence)+1)
+# print(sum(degree_sequence))
+# generated_graph = jdd_restricted_configuration_model(degree_sequence, joint_degree_dist)
+#
+# print(joint_degree_distribution(generated_graph, max(degree_sequence)+1))
+# print(joint_degree_distribution(Graph_1, max(degree_sequence)+1))
+#
+# draw_graph(Graph_1,'fdf')
+#
+# draw_graph(generated_graph,'dsfds')
 
 
 
