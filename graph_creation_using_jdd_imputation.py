@@ -8,6 +8,7 @@ import edge_imputation
 import structural_identities
 from collections import defaultdict
 from numpy.linalg import norm
+from copy import deepcopy
 
 
 def jdd(G):
@@ -26,6 +27,9 @@ def graph_difference(G1, G2, jdd_1=None, jdd_2=None):
 	if jdd_1 is None or jdd_2 is None:
 		jdd_1 = jdd(G1)
 		jdd_2 = jdd(G2)
+	else:
+		jdd_1 = deepcopy(jdd_1)
+		jdd_2 = deepcopy(jdd_2)
 
 	m = max(max(G1.degree().values()), max(G2.degree().values()))
 
@@ -37,6 +41,7 @@ def graph_difference(G1, G2, jdd_1=None, jdd_2=None):
 	return norm(M, 'fro')
 
 
+# Does not work
 def impute_edge_algorithm(G, target_G):
 	# Given a graph, add edges to minimize to the desired JDD
 	target_jdd = jdd(target_G)
@@ -47,6 +52,10 @@ def impute_edge_algorithm(G, target_G):
 	current_jdd = jdd(G)
 	current_diff = graph_difference(G, target_G, current_jdd, target_jdd)
 
+	print current_diff
+
+	print target_jdd
+	print current_jdd
 
 	for i in nodes:
 		for j in nodes:
@@ -54,9 +63,11 @@ def impute_edge_algorithm(G, target_G):
 				d1 = degrees[i]
 				d2 = degrees[j]
 				current_jdd[(d1, d2)] += 1
+
 				print current_jdd[(d1, d2)], target_jdd[(d1, d2)]
+
 				temp_diff = graph_difference(G, target_G, current_jdd, target_jdd)
-				# print temp_diff
+				print temp_diff
 				if temp_diff < current_diff:
 					current_diff = temp_diff
 					G.add_edge(i, j)
@@ -69,10 +80,9 @@ def impute_edge_algorithm(G, target_G):
 
 def test_edge_imputation():
 	G = random_graphs.barabasi_albert_model(500, 10)
-	degree_sequence = np.random.randint(1, 10, size=500)
-	new_G = random_graphs.configuration_model(degree_sequence)
+	degree_sequence = [1] * 500
 
-	print G.number_of_edges(), new_G.number_of_edges()
+	new_G = random_graphs.configuration_model(degree_sequence)
 
 	impute_edge_algorithm(new_G, G)
 
