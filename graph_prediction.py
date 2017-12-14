@@ -5,10 +5,12 @@ from numpy.random import choice, uniform
 from math import  floor, sqrt
 from random import sample
 from copy import deepcopy
+import numpy as np
 from numpy.random import randint
 from copy import deepcopy
 from numpy import linspace
 import networkx as nx
+import random
 
 def joint_degree_distribution(G):
 
@@ -51,7 +53,7 @@ def joint_degree(k_1, k_2, jDD = None, G = None):
         return 0
 
 def find_max_degree(G):
-    return max(G.degree().values())
+    return max(list(G.degree().values()))
 
 def remove_edges(g, p):
 
@@ -91,7 +93,7 @@ def norm_difference(JDD_1,JDD_2, norm_name):
 
     return norm(M,norm_name)
 
-def simulate_random_graphs(graph_name, number_of_nodes, additional_parameters = None):
+def simulate_random_graph(graph_name, number_of_nodes, additional_parameters = None):
 
     random_graphs = []
 
@@ -131,11 +133,14 @@ def simulate_random_graphs(graph_name, number_of_nodes, additional_parameters = 
                             ### generate random graph
                             community_sizes = uniform_partition_gen(min_community_sizes_,
                                         number_of_nodes, max_community_sizes_)
+                            new_graph = random_partition_model(community_sizes, p_in_, p_out_)
+                            if new_graph.nodes():
+                                random_graphs.append((new_graph,
+                                    {"graph": graph_name, "max_community_sizes": max_community_sizes_,
+                                     "min_community_sizes_": min_community_sizes_, "p_in": p_in_,
+                                     "p_out": p_out_}))
 
-                            random_graphs.append((random_partition_model(community_sizes, p_in_, p_out_),
-                                {"graph": graph_name, "max_community_sizes": max_community_sizes_,
-                                 "min_community_sizes_": min_community_sizes_, "p_in": p_in_,
-                                 "p_out": p_out_}))
+
             return random_graphs
 
         else:
@@ -144,10 +149,14 @@ def simulate_random_graphs(graph_name, number_of_nodes, additional_parameters = 
             max_community_sizes = choice(floor(number_of_nodes / 2))
             min_community_sizes = 1
             community_sizes = uniform_partition_gen(min_community_sizes, number_of_nodes, max_community_sizes)
-            random_graphs.append((random_partition_model(community_sizes, p_in, p_out),
-            {"graph": graph_name, "max_community_sizes": max_community_sizes,
-             "min_community_sizes_": min_community_sizes, "p_in": p_in,
-             "p_out": p_out}))
+            new_graph = random_partition_model(community_sizes, p_in, p_out)
+            if new_graph.nodes():
+                random_graphs.append((new_graph,
+                {"graph": graph_name, "max_community_sizes": max_community_sizes,
+                 "min_community_sizes_": min_community_sizes, "p_in": p_in,
+                 "p_out": p_out}))
+            else:
+                random_graphs = None
 
             return random_graphs
 
@@ -207,6 +216,14 @@ def simulate_random_graphs(graph_name, number_of_nodes, additional_parameters = 
         print('please provide a valid graphical model')
         return None
 
+def simulate_random_graphs(graph_names, number_of_nodes, additional_parameters = None):
+    proposal_graphs = []
+    for graph_name in graph_names:
+        new_graph = simulate_random_graph(graph_name, number_of_nodes, additional_parameters)
+        if new_graph is not None:
+            proposal_graphs.append(new_graph)
+    return proposal_graphs
+
 def uniform_partition_gen(min_val, sum_total, total_parts):
     M = sum_total - total_parts * (min_val - 1)
     if M < total_parts:
@@ -254,31 +271,32 @@ def generate_proposal_distributions(number_of_nodes, graph_names, parameter_mesh
     ### convert them to jdds
     proposal_jdds = []
     for graph in proposal_graphs:
-        jdd = joint_degree_distribution(graph[0])
-        proposal_jdds.append((jdd, graph[1]))
+        graph_ = [x for x,_ in graph][0]
+        graph_info = [x for _,x in graph][0]
+        jdd = joint_degree_distribution(graph_)
+        proposal_jdds.append((jdd, graph_info))
 
     ### return
     return proposal_jdds
 
 def edge_addition(empirical_graph, proposal_jdd, empirical_jdd, max_addition, attempts):
 
-    current_measure = norm_difference(proposal_jdd,empirical_jdd, 'fru')
-    updated_measure = current_measure + 1
+    current_measure = norm_difference(proposal_jdd,empirical_jdd, 'fro')
     possible_edges = nx.non_edges(empirical_graph)
-
+    possible_edges = [edge for edge in possible_edges]
     for attempt in range(attempts):
 
         ### pick number of edges to add
         edges_to_add = choice(max_addition+1)
 
         ### pick edges to add
-        new_edges = choice(possible_edges, edges_to_add)
+        new_edges = np.random.permutation(possible_edges)[:edges_to_add]
 
         ### check if the graph got closer
         new_graph = deepcopy(empirical_graph)
         new_graph.add_edges_from(new_edges)
         new_jdd = joint_degree_distribution(new_graph)
-        updated_measure = norm_difference(proposal_jdd,new_jdd, 'fru')
+        updated_measure = norm_difference(proposal_jdd, new_jdd, 'fro')
 
         if updated_measure < current_measure:
             return new_graph
@@ -292,10 +310,10 @@ def return_closest_match(graph_set, proposal_jdds, averaging):
 
     for i in range(len(graph_set)):
         for j in range(averaging):
-            jdd = joint_degree_distribution(graph_set[i][0])
+            jdd = joint_degree_distribution(graph_set[i])
             val = norm_difference(jdd, proposal_jdds[i][0], 'fro')
             if val/averaging < best_score:
-                best_graph = graph_set[i][1]
+                best_graph = graph_set[i]
 
     return best_graph
 
@@ -309,30 +327,46 @@ def find_closest_rg(empirical_graph, rg_graph_names, parameter_mesh_size, max_it
     ### reconstructions
     graph_set = generate_proposal_distributions(number_of_nodes, rg_graph_names, parameter_mesh_size)
     for g in range(len(graph_set)):
-        graph_set[g][0] = empirical_graph
+        graph_set[g] = empirical_graph
 
     for iteration in range(max_iterations):
 
         ### generate new set of proposal distributions
-        proposal_jdds = generate_proposal_distributions(number_of_nodes, rg_graph_names, parameter_mesh_size)
+        proposal_jdds = []
+        while len(graph_set) != len(proposal_jdds):
+            proposal_jdds = generate_proposal_distributions(number_of_nodes, rg_graph_names, parameter_mesh_size)
 
         ### attempt reconstruction over proposals
         counter = -1
         for jdd in proposal_jdds:
             counter += 1
-            empirical_jdd = joint_degree_distribution(graph_set[counter][0])
-            graph_set[counter][0] = edge_addition(empirical_graph, jdd[0], empirical_jdd, max_addition, attempts)
+            current_graph = graph_set[counter]
+            empirical_jdd = joint_degree_distribution(current_graph)
+            graph_set[counter] = edge_addition(graph_set[counter], jdd[0], empirical_jdd, max_addition, attempts)
 
     ### return closest match
-    return return_closest_match(graph_set, proposal_jdds)
+    averaging = 1
+    return return_closest_match(graph_set, proposal_jdds, averaging)
 
 def main():
+
+    ### reconstruction under full graph
     rg_graph_names = ['geometric_model', 'erdos_renyi',
                               'random_partition_model', 'barabasi_albert_model']
-    parameter_mesh_size = 3
+    parameter_mesh_size = 2
     max_iterations = 4
     empirical_graph = barabasi_albert_model(10,2)
-    find_closest_rg(empirical_graph, rg_graph_names, parameter_mesh_size, max_iterations)
+    print(find_closest_rg(empirical_graph, rg_graph_names, parameter_mesh_size, max_iterations))
+
+    ### reconstruction under 50%
+    rg_graph_names = ['geometric_model', 'erdos_renyi',
+                              'random_partition_model', 'barabasi_albert_model']
+    parameter_mesh_size = 2
+    max_iterations = 4
+    empirical_graph = barabasi_albert_model(25,2)
+    observed_graph = remove_edges(empirical_graph, .1)
+    print(find_closest_rg(observed_graph, rg_graph_names, parameter_mesh_size, max_iterations))
+
 
 if __name__ == "__main__":
     main()
