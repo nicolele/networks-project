@@ -489,11 +489,12 @@ def main():
 
     ### reconstruction under 50%
     rg_graph_names = ['geometric_model', 'erdos_renyi', 'barabasi_albert_model', 'random_partition_model']
+    ### which graphs do you want to consider?^
     parameter_mesh_size = 20 # number of sub rgs saught for a given rg model
     max_iterations = 1 # how long do we attempt to move towards a new rg
     averaging = 1 # number of times you sample to see which reconstruction was closest on average
     attempts = 1 # how many times we attemp to add a new random subset of edges to reconstruction per iteration
-    empirical_graph = barabasi_albert_model(25,10)
+    empirical_graph = erdos_renyi(25,.1)
     observed_graph = remove_edges(empirical_graph, .5)
     print(find_closest_rg(observed_graph, rg_graph_names, parameter_mesh_size,
                         max_iterations, averaging, attempts))
@@ -508,7 +509,8 @@ def main():
         4) are there any thresholds for certain random graphs where we have to be adding 
         a minimum number of edges per attempt to move within the space?
         5) does the algorithm gravitate towards any of the RG models often
-        6) are there any thresholds for each of the RGs so that we have high accuracy?   
+        6) are there any thresholds for each of the RGs so that we have high accuracy?  
+        7) look at how the accuracy grows or decays with the size of the graph 
     """
 
 
