@@ -66,6 +66,10 @@ def mean_neighbor_degree(G):
 	neighbor_degrees = mean_neighbor_degree_per_node(G)
 	return sum(neighbor_degrees.values())/len(neighbor_degrees)
 
+	
+def edge_count(G):
+	return G.number_of_edges()
+
 
 def global_clustering_coefficient(G):
 	return nx.average_clustering(G)

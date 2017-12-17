@@ -94,6 +94,7 @@ def run_graph_matching():
 	matrix_diff = [[0 for i in xrange(5)] for j in xrange(5)]
 
 	for sample in xrange(samples):
+		print sample
 		rgs = [structural_identities.watts_strogatz_generator(500, 22),
 			   structural_identities.geometric_generator(500, 0.125),
 			   structural_identities.erdos_renyi_generator(500, 0.05),
@@ -166,25 +167,84 @@ def plot_graph_matching():
 
 
 # Pass in G
-def predict_structure(G, trials):
+def predict_structure(G, trials=20):
 	n = G.number_of_nodes()
-	rgs = [structural_identities.watts_strogatz_generator(n),
-		   structural_identities.geometric_generator(n),
-		   structural_identities.erdos_renyi_generator(n),
-		   structural_identities.barabasi_albert_generator(n),
-		   structural_identities.planted_partition_generator(n)]
+	e = G.number_of_edges()
+	rgs = [structural_identities.watts_strogatz_generator,
+		   structural_identities.geometric_generator,
+		   structural_identities.erdos_renyi_generator,
+		   structural_identities.barabasi_albert_generator,
+		   structural_identities.planted_partition_generator]
+	index = ['Watts Strogatz', 'Geometric', 'Erdos Renyi', 'Barabasi Albert', 'Planted Partition Model']
+
+	constraints = {'edge_count': (.75*e, 1.25*e)}
+
+	difs = [0 for x in xrange(len(rgs))]
+	for _ in xrange(trials):
+		temp = []
+		for i, rg in enumerate(rgs):
+			G_2 = structural_identities.constrained_generation(rg, constraints)
+			dif = graph_difference(G, G_2)
+			temp.append(dif)
+		array = np.array(temp)
+		order = array.argsort()
+		ranks = order.argsort()
+
+		for i in xrange(len(ranks)):
+			difs[i] += ranks[i]
 
 
-	for trial in trials:
-
-	# Given a graph, predict what type of structure it has
-	# Do the impute edge_algorithm if need be
-	# call produce_jdds_for_rg for each generator
-		pass
+	total = sum(difs)*1.0
+	for i in xrange(len(difs)):
+		difs[i] = difs[i]/total
 
 
+	for i in xrange(len(difs)):
+		print difs[i], index[i]
+
+	return difs, index
 
 
+def run_predict_structure(generator, title):
+	constraints = {'edge_count': (1000, 1100)}
+
+	accuracy_at_k = [0] * 5
+	samples = 100
+	for sample in xrange(samples):
+		G = structural_identities.constrained_generation(generator, constraints)
+		cluster, types = predict_structure(G, trials=25)
+
+		print sample, types[cluster.index(min(cluster))]
+	
+		array = np.array(cluster)
+		order = array.argsort()
+		ranks = order.argsort().tolist()
+
+		k = -1
+		for i in xrange(len(cluster)): # 5 types of rg
+			if title==types[ranks.index(i)]:
+				k = i
+				break
+
+		j = len(cluster)-1
+		while j >= k:
+			accuracy_at_k[j] += 1
+			j -= 1
+
+
+	plt.figure(1)
+	plt.tight_layout()
+
+	for i in xrange(len(accuracy_at_k)):
+		accuracy_at_k[i] /= samples
+
+	plt.plot([i for i in xrange(1, 6)], accuracy_at_k)
+	plt.xlabel('k (top k labels)')
+	plt.ylabel('Accuracy @ k')
+	plt.title('Prediction Accuracy for ' + title + ' Random Graphs')
+		
+	plt.show()
+	
 
 if __name__ == "__main__":
 	# G = random_graphs.barabasi_albert_model(500, 10)
@@ -193,8 +253,16 @@ if __name__ == "__main__":
 	# G5 = random_graphs.erdos_renyi(500, 0.03)
 	# G4 = random_graphs.geometric_model(500, 0.12)
 	# print G4.number_of_edges(), G3.number_of_edges()
-	plot_graph_matching()
-	#test_edge_imputation()
-	#soft_clustering()
-	#run_graph_matching()
+	# plot_graph_matching()
+	# test_edge_imputation()
+	# soft_clustering()
+	run_predict_structure(structural_identities.erdos_renyi_generator, 'Erdos Renyi')
+	run_predict_structure(structural_identities.geometric_generator, 'Geometric')
+	run_predict_structure(structural_identities.barabasi_albert_generator, 'Barabasi Albert')
+	run_predict_structure(structural_identities.planted_partition_generator, 'Planted Partition Model')
+	run_predict_structure(structural_identities.watss_strogatz_generator, 'Watts Strogatz')
+
+
+
+
 

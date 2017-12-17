@@ -494,8 +494,8 @@ def main():
     max_iterations = 1 # how long do we attempt to move towards a new rg
     averaging = 1 # number of times you sample to see which reconstruction was closest on average
     attempts = 1 # how many times we attemp to add a new random subset of edges to reconstruction per iteration
-    empirical_graph = erdos_renyi(25,.1)
-    observed_graph = remove_edges(empirical_graph, .5)
+    empirical_graph = erdos_renyi(25, .5)
+    observed_graph = remove_edges(empirical_graph, .1)
     print(find_closest_rg(observed_graph, rg_graph_names, parameter_mesh_size,
                         max_iterations, averaging, attempts))
 

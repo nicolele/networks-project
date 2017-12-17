@@ -7,8 +7,9 @@ import graph_measures
 import matplotlib.mlab as mlab
 
 
-MAX_ATTEMPTS = 100
+MAX_ATTEMPTS = 10000
 CONSTRAINTS_LOOKUP = {
+ 'edge_count': graph_measures.edge_count,
  'diameter': graph_measures.diameter,
  'mean_degree': graph_measures.mean_degree,
  'mean_neighbor_degree': graph_measures.mean_neighbor_degree,
@@ -123,7 +124,7 @@ def graph_constrained_distributions(fig, points, points_constrained, dic):
 	plt.tight_layout()
 	plt.show()
 
-N = 250
+N = 100
 
 # Can generate with a fixed p or across many valid options of p
 def erdos_renyi_generator(n=N, p=-1):
@@ -206,7 +207,6 @@ def satisfies_constraints(G, constraints):
 
 		value = CONSTRAINTS_LOOKUP[constraint](G)
 		if not value <= valid_range[1] or not value >= valid_range[0]:
-			print value
 			return False
 
 	return True
@@ -220,7 +220,7 @@ def constrained_generation(generator_function, constraints):
 	attempts = 0
 	while attempts < MAX_ATTEMPTS:
 		G = generator_function()
-		print "OK"
+		#print "OK"
 		if satisfies_constraints(G, constraints):
 			return G
 		
