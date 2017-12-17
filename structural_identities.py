@@ -4,6 +4,7 @@ import numpy as np
 import networkx as nx
 import random_graphs
 import graph_measures
+import matplotlib.mlab as mlab
 
 
 MAX_ATTEMPTS = 100
@@ -21,6 +22,7 @@ CONSTRAINTS_LOOKUP = {
 def analyze_structural_identity(rg_generator, trials, fig, constraints=None):
 	# Not sure how to aggregate this into one graph for many different
 	# degree sequences
+	print constraints
 
 	mean_degrees = []
 	mean_neighbor_degrees = []
@@ -53,62 +55,80 @@ def analyze_structural_identity(rg_generator, trials, fig, constraints=None):
 	# Graph results
 	plt.figure(fig)
 
-	plt.subplot(334)
-	plt.hist(diameters, 20)
-	plt.title("Diameter")
+	kwargs = dict(histtype='stepfilled', alpha=0.5, normed=True, bins=20)
 
-	plt.subplot(335)
-	plt.hist(components_count, 20)
-	plt.title("Components Count")
+	dic = {331:"Mean Degree", 332:"Mean Neighbor Degree",\
+		   333:"Clustering Coefficient", 334:"Diameter",\
+		   335:"Components Count", 336:"Largest Component Size",\
+		   337:"Coefficient of Variation", 338:"Smallest Betweenness Centrality",\
+		   339:"Largest Betweenness Centrality"}
+	# plt.subplot(334)
+	# plt.hist(diameters, **kwargs)
+	# plt.title("Diameter")
 
-	plt.subplot(333)
-	plt.hist(global_clustering_coefficients, 20)
-	plt.title("Clustering Coefficient")
+	# plt.subplot(335)
+	# plt.hist(components_count, **kwargs)
+	# plt.title("Components Count")
 
-	plt.subplot(331)
-	plt.hist(mean_degrees, 20)
-	plt.title("Mean Degree")
+	# plt.subplot(333)
+	# plt.hist(global_clustering_coefficients, **kwargs)
+	# plt.title("Clustering Coefficient")
 
-	plt.subplot(332)
-	plt.hist(mean_neighbor_degrees, 20)
-	plt.title("Mean Neighbor Degree")
+	# plt.subplot(331)
+	# plt.hist(mean_degrees, **kwargs)
+	# plt.title("Mean Degree")
 
-	plt.subplot(336)
-	plt.hist(largest_component_sizes, 20)
-	plt.title("Largest Component Size")
+	# plt.subplot(332)
+	# plt.hist(mean_neighbor_degrees, **kwargs)
+	# plt.title("Mean Neighbor Degree")
 
-	plt.subplot(337)
-	plt.hist(coefficients_of_variations, 20)
-	plt.title("Coefficient of Variation")
+	# plt.subplot(336)
+	# plt.hist(largest_component_sizes, **kwargs)
+	# plt.title("Largest Component Size")
 
-	plt.subplot(338)
-	plt.hist(low_centrals, 20)
-	plt.title("Smallest Betweenness Centrality")
+	# plt.subplot(337)
+	# plt.hist(coefficients_of_variations, **kwargs)
+	# plt.title("Coefficient of Variation")
 
-	plt.subplot(339)
-	plt.hist(high_centrals, 20)
-	plt.title("Largest Betweenness Centrality")
+	# plt.subplot(338)
+	# plt.hist(low_centrals, **kwargs)
+	# plt.title("Smallest Betweenness Centrality")
+
+	# plt.subplot(339)
+	# plt.hist(high_centrals, **kwargs)
+	# plt.title("Largest Betweenness Centrality")
+
+	#plt.show()
+
+	return [mean_degrees, mean_neighbor_degrees, global_clustering_coefficients,\
+			diameters, components_count, largest_component_sizes,\
+			coefficients_of_variations, low_centrals, high_centrals], dic
+
+
+def graph_constrained_distributions(fig, points, points_constrained, dic):
+	plt.figure(fig)
+
+	kwargs = dict(histtype='stepfilled', alpha=0.5, bins=20)
+
+	for i in xrange(len(points)):
+		plt.subplot(331+i)
+		plt.hist(points[i], **kwargs)
+		plt.hist(points_constrained[i], **kwargs)
+		plt.title(dic[331+i])
+
 
 	plt.show()
 
-
-# @Wilder, @Nicole
-# Use the functions below to pass into function above, see main function
-# at bottom for example. You can choose to let the graph be completely
-# random, (holding nothing fixed except number of nodes), or you can
-# choose many fixed options for the given models. If we mess around with
-# these functions, we should be able to come up with 'fingerprint'
-# identities for the structure of the different types of graphs.
-
+N = 100
 
 # Can generate with a fixed p or across many valid options of p
-def erdos_renyi_generator(n=500, p=-1):
+def erdos_renyi_generator(n=N, p=-1):
 	if p < 0:
 		p = np.random.rand()
 	return random_graphs.erdos_renyi(n, p)
 
 
-def planted_partition_generator(n=500, groups=3, pin=-1, pout=-1, predefined_communities=[]):
+def planted_partition_generator(n=N, groups=3, pin=-1, pout=-1, predefined_communities=[]):
 	# Option for random pins and pouts with pins guaranteed to be > 0.5
 	# and pouts to be < 0.5
 	if pin < 0:
@@ -137,14 +157,14 @@ def planted_partition_generator(n=500, groups=3, pin=-1, pout=-1, predefined_com
 	return random_graphs.random_partition_model(communities, pin, pout)
 
 
-def barabasi_albert_generator(n=500, c=-1):
+def barabasi_albert_generator(n=N, c=-1):
 	if c < 0:
 		c = np.random.randint(1, 50)
 	#print c
 	return random_graphs.barabasi_albert_model(n, c)
 
 
-def geometric_generator(n=500, r=-1):
+def geometric_generator(n=N, r=-1):
 	if r < 0:
 		r = np.random.rand()
 		if r < 0.1:
@@ -153,7 +173,7 @@ def geometric_generator(n=500, r=-1):
 	return random_graphs.geometric_model(n, r)
 
 
-def watts_strogatz_generator(n=500, k=-1, p=-1):
+def watts_strogatz_generator(n=N, k=-1, p=-1):
 	if k < 0:
 		k = np.random.randint(5, 25)
 	if p < 0:
@@ -162,7 +182,7 @@ def watts_strogatz_generator(n=500, k=-1, p=-1):
 	return random_graphs.watts_strogatz_model(n, k, p)
 
 
-def configuration_model_generator(n=500, max_degree=-1, fixed_sequence = []):
+def configuration_model_generator(n=N, max_degree=-1, fixed_sequence = []):
 	if len(fixed_sequence) != 0:
 		return random_graphs.configuration_model(fixed_sequence, cleaned=True)
 	
@@ -196,17 +216,17 @@ def constrained_generation(generator_function, constraints):
 	attempts = 0
 	while attempts < MAX_ATTEMPTS:
 		G = generator_function()
+		print "OK"
 		if satisfies_constraints(G, constraints):
 			return G
 		
 		attempts += 1
 
 	print "Desired function cannot meet constraints... exiting."
-	exit()
 
 
 if __name__ == "__main__":
-	#analyze_structural_identity(configuration_model_generator, 100, 1) # Fig 1
+	points, dic = analyze_structural_identity(configuration_model_generator, 100, 1) # Fig 1
 	#analyze_structural_identity(watts_strogatz_generator, 1000, 2)
 	#analyze_structural_identity(geometric_generator, 1000, 3)
 	#analyze_structural_identity(erdos_renyi_generator, 1000, 4)
@@ -214,4 +234,8 @@ if __name__ == "__main__":
 	#analyze_structural_identity(planted_partition_generator, 1000, 6) # Figt 6
 
 	constraints = {'diameter': (4, 8)}
-	analyze_structural_identity(configuration_model_generator, 100, 1, constraints)
+	constrained_points, dic = analyze_structural_identity(configuration_model_generator, 100, 1, constraints)
+
+	graph_constrained_distributions(1, points, constrained_points, dic)
+
+
