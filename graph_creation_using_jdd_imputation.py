@@ -48,32 +48,31 @@ def impute_edge_algorithm(G, target_G):
 
 	nodes = G.nodes()
 	degrees = G.degree()
-
+	
 	current_jdd = jdd(G)
 	current_diff = graph_difference(G, target_G, current_jdd, target_jdd)
-
-	print current_diff
-
-	print target_jdd
-	print current_jdd
 
 	for i in nodes:
 		for j in nodes:
 			if not G.has_edge(i, j):
-				d1 = degrees[i]
-				d2 = degrees[j]
+				d1 = degrees[i]	+ 1
+				d2 = degrees[j] + 1
+
 				current_jdd[(d1, d2)] += 1
-
-				print current_jdd[(d1, d2)], target_jdd[(d1, d2)]
-
-				temp_diff = graph_difference(G, target_G, current_jdd, target_jdd)
-				print temp_diff
-				if temp_diff < current_diff:
-					current_diff = temp_diff
-					G.add_edge(i, j)
-					print temp_diff
+				
+				if target_jdd.has_key((d1, d2)):
+					temp_diff = graph_difference(G, target_G, current_jdd, target_jdd)
+				
+					if temp_diff <= current_diff:
+						current_diff = temp_diff
+						G.add_edge(i, j)
+						print temp_diff
+					else:
+						current_jdd[(d1, d2)] -= 1
 				else:
-					current_jdd[(d1, d2)] -= 1
+					G.add_edge(i, j)
+
+		print current_diff
 
 	print G.number_of_edges(), target_G.number_of_edges()
 
@@ -126,13 +125,13 @@ def run_graph_matching():
 		   structural_identities.planted_partition_generator(500, 3, 0.1, 0.01)]
 
 
-	samples = 200
+	samples = 150
 	matrix_diff = [[0 for i in xrange(len(rgs))] for j in xrange(len(rgs))]
 	for sample in xrange(samples):
 		print sample
 		for i, rg1 in enumerate(rgs):
 			for j, rg2 in enumerate(rgs2):
-				matrix_diff[i][j] += graph_difference(rg1, rg2)
+				matrix_diff[i][j] += (graph_difference(rg1, rg2)**2)
 
 	for i in xrange(len(matrix_diff)):
 		for j in xrange(len(matrix_diff[i])):
@@ -148,7 +147,7 @@ def plot_graph_matching():
 	y_pos = np.arange(len(objects))
 
 	plt.figure(1)
-
+	plt.tight_layout()
 	# plt.subplot(231)
 	# plt.bar(y_pos, m_diff[0], align='center', alpha=0.5)
 	# plt.xticks(y_pos, objects)
@@ -164,13 +163,13 @@ def plot_graph_matching():
 	plt.subplot(232)
 	plt.bar(y_pos, m_diff[1], align='center', alpha=0.5)
 	plt.xticks(y_pos, objects)
-	plt.ylabel('Graph Difference (JDD Norms)')
+	#plt.ylabel('Graph Difference (JDD Norms)')
 	plt.title('Geometric')
 
 	plt.subplot(233)
 	plt.bar(y_pos, m_diff[2], align='center', alpha=0.5)
 	plt.xticks(y_pos, objects)
-	plt.ylabel('Graph Difference (JDD Norms)')
+	#plt.ylabel('Graph Difference (JDD Norms)')
 	plt.title('Erdos Renyi')
 
 	plt.subplot(234)
@@ -182,7 +181,7 @@ def plot_graph_matching():
 	plt.subplot(235)
 	plt.bar(y_pos, m_diff[4], align='center', alpha=0.5)
 	plt.xticks(y_pos, objects)
-	plt.ylabel('Graph Difference (JDD Norms)')
+	#plt.ylabel('Graph Difference (JDD Norms)')
 	plt.title('Planted Partition')
 
 	plt.show()
@@ -196,7 +195,7 @@ if __name__ == "__main__":
 	# G5 = random_graphs.erdos_renyi(500, 0.03)
 	# G4 = random_graphs.geometric_model(500, 0.12)
 	# print G4.number_of_edges(), G3.number_of_edges()
-
-	test_edge_imputation()
+	plot_graph_matching()
+	#test_edge_imputation()
 
 

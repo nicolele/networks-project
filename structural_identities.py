@@ -62,43 +62,46 @@ def analyze_structural_identity(rg_generator, trials, fig, constraints=None):
 		   335:"Components Count", 336:"Largest Component Size",\
 		   337:"Coefficient of Variation", 338:"Smallest Betweenness Centrality",\
 		   339:"Largest Betweenness Centrality"}
-	# plt.subplot(334)
-	# plt.hist(diameters, **kwargs)
-	# plt.title("Diameter")
+	
+	plt.tight_layout()
 
-	# plt.subplot(335)
-	# plt.hist(components_count, **kwargs)
-	# plt.title("Components Count")
+	plt.subplot(334)
+	plt.hist(diameters, **kwargs)
+	plt.title("Diameter")
 
-	# plt.subplot(333)
-	# plt.hist(global_clustering_coefficients, **kwargs)
-	# plt.title("Clustering Coefficient")
+	plt.subplot(335)
+	plt.hist(components_count, **kwargs)
+	plt.title("Components Count")
 
-	# plt.subplot(331)
-	# plt.hist(mean_degrees, **kwargs)
-	# plt.title("Mean Degree")
+	plt.subplot(333)
+	plt.hist(global_clustering_coefficients, **kwargs)
+	plt.title("Clustering Coefficient")
 
-	# plt.subplot(332)
-	# plt.hist(mean_neighbor_degrees, **kwargs)
-	# plt.title("Mean Neighbor Degree")
+	plt.subplot(331)
+	plt.hist(mean_degrees, **kwargs)
+	plt.title("Mean Degree")
 
-	# plt.subplot(336)
-	# plt.hist(largest_component_sizes, **kwargs)
-	# plt.title("Largest Component Size")
+	plt.subplot(332)
+	plt.hist(mean_neighbor_degrees, **kwargs)
+	plt.title("Mean Neighbor Degree")
 
-	# plt.subplot(337)
-	# plt.hist(coefficients_of_variations, **kwargs)
-	# plt.title("Coefficient of Variation")
+	plt.subplot(336)
+	plt.hist(largest_component_sizes, **kwargs)
+	plt.title("Largest Component Size")
 
-	# plt.subplot(338)
-	# plt.hist(low_centrals, **kwargs)
-	# plt.title("Smallest Betweenness Centrality")
+	plt.subplot(337)
+	plt.hist(coefficients_of_variations, **kwargs)
+	plt.title("Coefficient of Variation")
 
-	# plt.subplot(339)
-	# plt.hist(high_centrals, **kwargs)
-	# plt.title("Largest Betweenness Centrality")
+	plt.subplot(338)
+	plt.hist(low_centrals, **kwargs)
+	plt.title("Smallest Betweenness Centrality")
 
-	#plt.show()
+	plt.subplot(339)
+	plt.hist(high_centrals, **kwargs)
+	plt.title("Largest Betweenness Centrality")
+
+	plt.show()
 
 	return [mean_degrees, mean_neighbor_degrees, global_clustering_coefficients,\
 			diameters, components_count, largest_component_sizes,\
@@ -107,8 +110,7 @@ def analyze_structural_identity(rg_generator, trials, fig, constraints=None):
 
 def graph_constrained_distributions(fig, points, points_constrained, dic):
 	plt.figure(fig)
-
-
+	plt.tight_layout()
 
 	for i in xrange(len(points)):
 		bins = np.histogram(np.hstack((points[i],points_constrained[i])), bins=20)[1] #get the bin edges
