@@ -62,8 +62,7 @@ def analyze_structural_identity(rg_generator, trials, fig, constraints=None):
 		   335:"Components Count", 336:"Largest Component Size",\
 		   337:"Coefficient of Variation", 338:"Smallest Betweenness Centrality",\
 		   339:"Largest Betweenness Centrality"}
-	
-	plt.tight_layout()
+
 
 	plt.subplot(334)
 	plt.hist(diameters, **kwargs)
@@ -100,6 +99,7 @@ def analyze_structural_identity(rg_generator, trials, fig, constraints=None):
 	plt.subplot(339)
 	plt.hist(high_centrals, **kwargs)
 	plt.title("Largest Betweenness Centrality")
+	plt.tight_layout()
 
 	plt.show()
 
@@ -110,7 +110,6 @@ def analyze_structural_identity(rg_generator, trials, fig, constraints=None):
 
 def graph_constrained_distributions(fig, points, points_constrained, dic):
 	plt.figure(fig)
-	plt.tight_layout()
 
 	for i in xrange(len(points)):
 		bins = np.histogram(np.hstack((points[i],points_constrained[i])), bins=20)[1] #get the bin edges
@@ -121,10 +120,10 @@ def graph_constrained_distributions(fig, points, points_constrained, dic):
 		plt.hist(points_constrained[i], **kwargs)
 		plt.title(dic[331+i])
 
-
+	plt.tight_layout()
 	plt.show()
 
-N = 100
+N = 250
 
 # Can generate with a fixed p or across many valid options of p
 def erdos_renyi_generator(n=N, p=-1):
@@ -231,15 +230,15 @@ def constrained_generation(generator_function, constraints):
 
 
 if __name__ == "__main__":
-	points, dic = analyze_structural_identity(configuration_model_generator, 100, 1) # Fig 1
+	points, dic = analyze_structural_identity(configuration_model_generator, 250, 1) # Fig 1
 	#analyze_structural_identity(watts_strogatz_generator, 1000, 2)
 	#analyze_structural_identity(geometric_generator, 1000, 3)
 	#analyze_structural_identity(erdos_renyi_generator, 1000, 4)
 	#analyze_structural_identity(barabasi_albert_generator, 1000, 5)
 	#analyze_structural_identity(planted_partition_generator, 1000, 6) # Figt 6
 
-	constraints = {'diameter': (4, 8)}
-	constrained_points, dic = analyze_structural_identity(configuration_model_generator, 100, 1, constraints)
+	constraints = {'diameter': (4, 5)}
+	constrained_points, dic = analyze_structural_identity(configuration_model_generator, 250, 1, constraints)
 
 	graph_constrained_distributions(1, points, constrained_points, dic)
 
