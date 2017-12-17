@@ -108,9 +108,12 @@ def analyze_structural_identity(rg_generator, trials, fig, constraints=None):
 def graph_constrained_distributions(fig, points, points_constrained, dic):
 	plt.figure(fig)
 
-	kwargs = dict(histtype='stepfilled', alpha=0.5, bins=20)
+
 
 	for i in xrange(len(points)):
+		bins = np.histogram(np.hstack((points[i],points_constrained[i])), bins=20)[1] #get the bin edges
+		kwargs = dict(histtype='stepfilled', alpha=0.5, bins=bins)
+		
 		plt.subplot(331+i)
 		plt.hist(points[i], **kwargs)
 		plt.hist(points_constrained[i], **kwargs)
