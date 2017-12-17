@@ -198,9 +198,8 @@ def predict_structure(G, trials=20):
 	for i in xrange(len(difs)):
 		difs[i] = difs[i]/total
 
-
-	for i in xrange(len(difs)):
-		print difs[i], index[i]
+	# for i in xrange(len(difs)):
+	# 	print difs[i], index[i]
 
 	return difs, index
 
@@ -212,7 +211,7 @@ def run_predict_structure(generator, title):
 	samples = 100
 	for sample in xrange(samples):
 		G = structural_identities.constrained_generation(generator, constraints)
-		cluster, types = predict_structure(G, trials=25)
+		cluster, types = predict_structure(G, trials=20)
 
 		print sample, types[cluster.index(min(cluster))]
 	
@@ -233,13 +232,13 @@ def run_predict_structure(generator, title):
 
 
 	plt.figure(1)
-	plt.tight_layout()
 
 	for i in xrange(len(accuracy_at_k)):
-		accuracy_at_k[i] /= samples
+		accuracy_at_k[i] /= (samples*1.0)
 
-	plt.plot([i for i in xrange(1, 6)], accuracy_at_k)
+	plt.plot([i for i in xrange(1, 6)], accuracy_at_k, marker='o')
 	plt.xlabel('k (top k labels)')
+	plt.ylim((0, 1.1))
 	plt.ylabel('Accuracy @ k')
 	plt.title('Prediction Accuracy for ' + title + ' Random Graphs')
 		
@@ -257,10 +256,10 @@ if __name__ == "__main__":
 	# test_edge_imputation()
 	# soft_clustering()
 	run_predict_structure(structural_identities.erdos_renyi_generator, 'Erdos Renyi')
-	run_predict_structure(structural_identities.geometric_generator, 'Geometric')
-	run_predict_structure(structural_identities.barabasi_albert_generator, 'Barabasi Albert')
-	run_predict_structure(structural_identities.planted_partition_generator, 'Planted Partition Model')
-	run_predict_structure(structural_identities.watss_strogatz_generator, 'Watts Strogatz')
+	# run_predict_structure(structural_identities.geometric_generator, 'Geometric')
+	# run_predict_structure(structural_identities.barabasi_albert_generator, 'Barabasi Albert')
+	# run_predict_structure(structural_identities.planted_partition_generator, 'Planted Partition Model')
+	# run_predict_structure(structural_identities.watss_strogatz_generator, 'Watts Strogatz')
 
 
 
