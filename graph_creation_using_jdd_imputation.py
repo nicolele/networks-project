@@ -86,49 +86,26 @@ def test_edge_imputation():
 	impute_edge_algorithm(new_G, G)
 
 
-def produce_jdds_for_rg(rg_generator):
-	# Create a bunch of trials and average to get a jdd
-	#analyze_structural_identity(configuration_model_generator, 100, 1) # Fig 1
-	#analyze_structural_identity(watts_strogatz_generator, 1000, 2)
-	#analyze_structural_identity(geometric_generator, 1000, 3)
-	#analyze_structural_identity(erdos_renyi_generator, 1000, 4)
-	#analyze_structural_identity(barabasi_albert_generator, 1000, 5)
-	#analyze_structural_identity(planted_partition_generator, 1000, 6)
-	pass
-
-
-def predict_structure(G):
-	# Given a graph, predict what type of structure it has
-	# Do the impute edge_algorithm if need be
-	# call produce_jdds_for_rg for each generator
-	pass
-
-
-def compare_statistics(G1, G2):
-	pass 
-
-
-
 def run_graph_matching():
 	# Create a bunch of trials and average to get a jdd
 	#rgs = [#[structural_identities.configuration_model_generator,
-	rgs = [structural_identities.watts_strogatz_generator(500, 22),
-		   structural_identities.geometric_generator(500, 0.125),
-		   structural_identities.erdos_renyi_generator(500, 0.05),
-		   structural_identities.barabasi_albert_generator(500, 12),
-		   structural_identities.planted_partition_generator(500, 3, 0.1, 0.01)]
-
-	rgs2 = [structural_identities.watts_strogatz_generator(500, 22),
-		   structural_identities.geometric_generator(500, 0.125),
-		   structural_identities.erdos_renyi_generator(500, 0.05),
-		   structural_identities.barabasi_albert_generator(500, 12),
-		   structural_identities.planted_partition_generator(500, 3, 0.1, 0.01)]
-
 
 	samples = 150
-	matrix_diff = [[0 for i in xrange(len(rgs))] for j in xrange(len(rgs))]
+	matrix_diff = [[0 for i in xrange(5)] for j in xrange(5)]
+
 	for sample in xrange(samples):
-		print sample
+		rgs = [structural_identities.watts_strogatz_generator(500, 22),
+			   structural_identities.geometric_generator(500, 0.125),
+			   structural_identities.erdos_renyi_generator(500, 0.05),
+			   structural_identities.barabasi_albert_generator(500, 12),
+			   structural_identities.planted_partition_generator(500, 3, 0.1, 0.01)]
+
+		rgs2 = [structural_identities.watts_strogatz_generator(500, 22),
+			   structural_identities.geometric_generator(500, 0.125),
+			   structural_identities.erdos_renyi_generator(500, 0.05),
+			   structural_identities.barabasi_albert_generator(500, 12),
+			   structural_identities.planted_partition_generator(500, 3, 0.1, 0.01)]
+
 		for i, rg1 in enumerate(rgs):
 			for j, rg2 in enumerate(rgs2):
 				matrix_diff[i][j] += (graph_difference(rg1, rg2)**2)
@@ -188,6 +165,27 @@ def plot_graph_matching():
 
 
 
+# Pass in G
+def predict_structure(G, trials):
+	n = G.number_of_nodes()
+	rgs = [structural_identities.watts_strogatz_generator(n),
+		   structural_identities.geometric_generator(n),
+		   structural_identities.erdos_renyi_generator(n),
+		   structural_identities.barabasi_albert_generator(n),
+		   structural_identities.planted_partition_generator(n)]
+
+
+	for trial in trials:
+
+	# Given a graph, predict what type of structure it has
+	# Do the impute edge_algorithm if need be
+	# call produce_jdds_for_rg for each generator
+		pass
+
+
+
+
+
 if __name__ == "__main__":
 	# G = random_graphs.barabasi_albert_model(500, 10)
 	# G2 = random_graphs.barabasi_albert_model(500, 10)
@@ -197,5 +195,6 @@ if __name__ == "__main__":
 	# print G4.number_of_edges(), G3.number_of_edges()
 	plot_graph_matching()
 	#test_edge_imputation()
-
+	#soft_clustering()
+	#run_graph_matching()
 
