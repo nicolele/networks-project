@@ -20,6 +20,95 @@ CONSTRAINTS_LOOKUP = {
 }
 
 
+def analyze_structural_identity_graphs(Gs, fig, constraints=None):
+	# Not sure how to aggregate this into one graph for many different
+	# degree sequences
+	print constraints
+
+	mean_degrees = []
+	mean_neighbor_degrees = []
+	# Note, this is the diameter of the largest connected component
+	diameters = []
+	components_count = []
+	global_clustering_coefficients = []
+	largest_component_sizes = []
+	coefficients_of_variations = []
+	low_centrals = []
+	high_centrals = []
+
+	for i in xrange(len(Gs)):
+		G = Gs[i]
+		#print G.number_of_edges()
+		print "Trial, ", i
+
+		mean_degrees.append(graph_measures.mean_degree(G))
+		mean_neighbor_degrees.append(graph_measures.mean_neighbor_degree(G))
+		diameters.append(graph_measures.diameter(G))
+		components_count.append(graph_measures.connected_components_count(G))
+		global_clustering_coefficients.append(graph_measures.global_clustering_coefficient(G))
+		largest_component_sizes.append(graph_measures.largest_component(G))
+		coefficients_of_variations.append(graph_measures.coefficient_of_variation(G))
+		centrals = graph_measures.hi_lo_centrality(graph_measures.betweenness_centrality, G)
+		low_centrals.append(centrals[0])
+		high_centrals.append(centrals[1])
+
+
+	# Graph results
+	plt.figure(fig)
+
+	kwargs = dict(histtype='stepfilled', alpha=0.5, normed=True, bins=20)
+
+	dic = {331:"Mean Degree", 332:"Mean Neighbor Degree",\
+		   333:"Clustering Coefficient", 334:"Diameter",\
+		   335:"Components Count", 336:"Largest Component Size",\
+		   337:"Coefficient of Variation", 338:"Smallest Betweenness Centrality",\
+		   339:"Largest Betweenness Centrality"}
+
+
+	# plt.subplot(334)
+	# plt.hist(diameters, **kwargs)
+	# plt.title("Diameter")
+
+	# plt.subplot(335)
+	# plt.hist(components_count, **kwargs)
+	# plt.title("Components Count")
+
+	# plt.subplot(333)
+	# plt.hist(global_clustering_coefficients, **kwargs)
+	# plt.title("Clustering Coefficient")
+
+	# plt.subplot(331)
+	# plt.hist(mean_degrees, **kwargs)
+	# plt.title("Mean Degree")
+
+	# plt.subplot(332)
+	# plt.hist(mean_neighbor_degrees, **kwargs)
+	# plt.title("Mean Neighbor Degree")
+
+	# plt.subplot(336)
+	# plt.hist(largest_component_sizes, **kwargs)
+	# plt.title("Largest Component Size")
+
+	# plt.subplot(337)
+	# plt.hist(coefficients_of_variations, **kwargs)
+	# plt.title("Coefficient of Variation")
+
+	# plt.subplot(338)
+	# plt.hist(low_centrals, **kwargs)
+	# plt.title("Smallest Betweenness Centrality")
+
+	# plt.subplot(339)
+	# plt.hist(high_centrals, **kwargs)
+	# plt.title("Largest Betweenness Centrality")
+	# plt.tight_layout()
+
+	#plt.show()
+
+	return [mean_degrees, mean_neighbor_degrees, global_clustering_coefficients,\
+			diameters, components_count, largest_component_sizes,\
+			coefficients_of_variations, low_centrals, high_centrals], dic
+
+
 def analyze_structural_identity(rg_generator, trials, fig, constraints=None):
 	# Not sure how to aggregate this into one graph for many different
 	# degree sequences
@@ -61,48 +150,48 @@ def analyze_structural_identity(rg_generator, trials, fig, constraints=None):
 	dic = {331:"Mean Degree", 332:"Mean Neighbor Degree",\
 		   333:"Clustering Coefficient", 334:"Diameter",\
 		   335:"Components Count", 336:"Largest Component Size",\
-		   337:"Coefficient of Variation", 338:"Smallest Betweenness Centrality",\
-		   339:"Largest Betweenness Centrality"}
+		   337:"Coefficient of Variation", 338:"Smallest Centrality",\
+		   339:"Largest Centrality"}
 
 
-	plt.subplot(334)
-	plt.hist(diameters, **kwargs)
-	plt.title("Diameter")
+	#plt.subplot(334)
+	# plt.hist(diameters, **kwargs)
+	# plt.title("Diameter")
 
-	plt.subplot(335)
-	plt.hist(components_count, **kwargs)
-	plt.title("Components Count")
+	# plt.subplot(335)
+	# plt.hist(components_count, **kwargs)
+	# plt.title("Components Count")
 
-	plt.subplot(333)
-	plt.hist(global_clustering_coefficients, **kwargs)
-	plt.title("Clustering Coefficient")
+	# plt.subplot(333)
+	# plt.hist(global_clustering_coefficients, **kwargs)
+	# plt.title("Clustering Coefficient")
 
-	plt.subplot(331)
-	plt.hist(mean_degrees, **kwargs)
-	plt.title("Mean Degree")
+	# plt.subplot(331)
+	# plt.hist(mean_degrees, **kwargs)
+	# plt.title("Mean Degree")
 
-	plt.subplot(332)
-	plt.hist(mean_neighbor_degrees, **kwargs)
-	plt.title("Mean Neighbor Degree")
+	# plt.subplot(332)
+	# plt.hist(mean_neighbor_degrees, **kwargs)
+	# plt.title("Mean Neighbor Degree")
 
-	plt.subplot(336)
-	plt.hist(largest_component_sizes, **kwargs)
-	plt.title("Largest Component Size")
+	# plt.subplot(336)
+	# plt.hist(largest_component_sizes, **kwargs)
+	# plt.title("Largest Component Size")
 
-	plt.subplot(337)
-	plt.hist(coefficients_of_variations, **kwargs)
-	plt.title("Coefficient of Variation")
+	# plt.subplot(337)
+	# plt.hist(coefficients_of_variations, **kwargs)
+	# plt.title("Coefficient of Variation")
 
-	plt.subplot(338)
-	plt.hist(low_centrals, **kwargs)
-	plt.title("Smallest Betweenness Centrality")
+	# plt.subplot(338)
+	# plt.hist(low_centrals, **kwargs)
+	# plt.title("Smallest Betweenness Centrality")
 
-	plt.subplot(339)
-	plt.hist(high_centrals, **kwargs)
-	plt.title("Largest Betweenness Centrality")
-	plt.tight_layout()
+	# plt.subplot(339)
+	# plt.hist(high_centrals, **kwargs)
+	# plt.title("Largest Betweenness Centrality")
+	# plt.tight_layout()
 
-	plt.show()
+	#plt.show()
 
 	return [mean_degrees, mean_neighbor_degrees, global_clustering_coefficients,\
 			diameters, components_count, largest_component_sizes,\
@@ -123,6 +212,25 @@ def graph_constrained_distributions(fig, points, points_constrained, dic):
 
 	plt.tight_layout()
 	plt.show()
+
+
+def graph_created_distributions(fig, metrics, metrics2, dic):
+	plt.figure(fig)
+
+	for i in xrange(len(metrics)):
+		bins = np.histogram(np.hstack((metrics[i],metrics2[i])), bins=20)[1] #get the bin edges
+		kwargs = dict(histtype='stepfilled', alpha=0.5, bins=bins)
+
+		
+		plt.subplot(331+i)
+		plt.hist(metrics[i], **kwargs)
+		plt.hist(metrics2[i], color='red', **kwargs)
+		plt.title(dic[331+i])
+
+	plt.tight_layout()
+	plt.savefig('/Users/Brennan/Desktop/Networks/networks-project/pictures/' + str(fig) +'.png')
+
+
 
 N = 100
 

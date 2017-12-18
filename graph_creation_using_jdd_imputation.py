@@ -43,50 +43,6 @@ def graph_difference(G1, G2, jdd_1=None, jdd_2=None):
 	return norm(M, 'fro')
 
 
-# Does not work
-def impute_edge_algorithm(G, target_G):
-	# Given a graph, add edges to minimize to the desired JDD
-	target_jdd = jdd(target_G)
-
-	nodes = G.nodes()
-	degrees = G.degree()
-	
-	current_jdd = jdd(G)
-	current_diff = graph_difference(G, target_G, current_jdd, target_jdd)
-
-	for i in nodes:
-		for j in nodes:
-			if not G.has_edge(i, j):
-				d1 = degrees[i]	+ 1
-				d2 = degrees[j] + 1
-
-				current_jdd[(d1, d2)] += 1
-				
-				if target_jdd.has_key((d1, d2)):
-					temp_diff = graph_difference(G, target_G, current_jdd, target_jdd)
-				
-					if temp_diff <= current_diff:
-						current_diff = temp_diff
-						G.add_edge(i, j)
-						print temp_diff
-					else:
-						current_jdd[(d1, d2)] -= 1
-				else:
-					G.add_edge(i, j)
-
-		print current_diff
-
-	print G.number_of_edges(), target_G.number_of_edges()
-
-
-def test_edge_imputation():
-	G = random_graphs.barabasi_albert_model(500, 10)
-	degree_sequence = [1] * 500
-
-	new_G = random_graphs.configuration_model(degree_sequence)
-
-	impute_edge_algorithm(new_G, G)
-
 
 def run_graph_matching():
 	# Create a bunch of trials and average to get a jdd
@@ -191,6 +147,7 @@ def predict_structure(G, trials=20, constraints=False):
 
 	difs = [0 for x in xrange(len(rgs))]
 	for _ in xrange(trials):
+		print _
 		temp = []
 		for i, rg in enumerate(rgs):
 			G_2 = structural_identities.constrained_generation(rg, constraints)
@@ -324,7 +281,128 @@ def run_predict_structure(generator=None, title=None):
 		plt.show()
 
 
+
+# Does not work
+def impute_edge_algorithm(G, target_G):
+	# Given a graph, add edges to minimize to the desired JDD
+	target_jdd = jdd(target_G)
+
+	nodes = G.nodes()
+	degrees = G.degree()
+	
+	current_jdd = jdd(G)
+	current_diff = graph_difference(G, target_G, current_jdd, target_jdd)
+
+	#exit()
+	count = 0
+	while (G.number_of_edges() < target_G.number_of_edges()):
+		count += 1
+		best_edge = (0, 0)
+		best_diff = float('inf')
+		for _ in xrange(3):
+			i = np.random.randint(len(nodes))
+			j = np.random.randint(len(nodes))
+
+			if not G.has_edge(i, j):
+				d1 = degrees[i]	+ 1
+				d2 = degrees[j] + 1
+
+				current_jdd[(d1, d2)] += 1
+					
+				temp_diff = graph_difference(G, target_G, current_jdd, target_jdd)
+				
+				if temp_diff < best_diff:
+					best_edge = (i, j)
+					current_jdd[(d1, d2)] -= 1
+
+		G.add_edge(*best_edge)
+
+	return G
+
+
+def test_edge_imputation():
+	constraints = {'edge_count': (1000, 1100)}
+	accuracy_at_k = [0] * 5
+
+	confusion_matrix = [[0 for i in xrange(5)] for j in xrange(5)]
+	samples = 100
+	index = ['Watts Strogatz', 'Geometric', 'Erdos Renyi', 'Barabasi Albert', 'Planted Partition Model']
+	constraints_enforced=False
+	rgs = [structural_identities.watts_strogatz_generator,
+		   structural_identities.geometric_generator,
+		   structural_identities.erdos_renyi_generator,
+		   structural_identities.barabasi_albert_generator,
+		   structural_identities.planted_partition_generator]
+
+
+	for uni, rg in enumerate(rgs):
+		title = index[uni]
+		actual = uni
+		created_graphs = []
+		for i in xrange(samples):
+			G = structural_identities.constrained_generation(rg, constraints)
+			
+			degree_sequence = [1] * G.number_of_nodes()
+
+			new_G = random_graphs.configuration_model(degree_sequence)
+			new_G = impute_edge_algorithm(new_G, G)
+			created_graphs.append(new_G)
+
+			cluster, types = predict_structure(new_G, 2, constraints_enforced)
+
+			predicted = cluster.index(min(cluster))
+			print title, types[predicted]
+
+			confusion_matrix[actual][predicted] += 1
+
+			array = np.array(cluster)
+			order = array.argsort()
+			ranks = order.argsort().tolist()
+
+			k = -1
+			for i in xrange(len(cluster)): # 5 types of rg
+				if title==types[ranks.index(i)]:
+					k = i
+					break
+
+			j = len(cluster)-1
+			while j >= k:
+				accuracy_at_k[j] += 1
+				j -= 1
+
+		# HERE we plot distros
+		observed_metrics, dic = structural_identities.analyze_structural_identity_graphs(created_graphs, uni)
+		predict_metrics, dic = structural_identities.analyze_structural_identity(rg, samples, uni)# constraints=None):
+		structural_identities.graph_created_distributions(uni, observed_metrics, predict_metrics, dic)
+
+
+	small_index = ['WS', 'Geo', 'ER', 'BA', 'PPM']
+
+
+	for i in xrange(len(accuracy_at_k)):
+		accuracy_at_k[i] /= (samples*1.0*len(rgs))
+
+	if constraints_enforced:
+		plt.plot([i for i in xrange(1, 6)], accuracy_at_k, marker='o', color='red')
+	else:
+		plt.plot([i for i in xrange(1, 6)], accuracy_at_k, marker='o')
+	plt.xlabel('k (top k labels)')
+	plt.ylim((0, 1.1))
+	plt.ylabel('Accuracy @ k')
+	plt.title('Prediction Accuracy for Uniformly Sampled Random Graphs')
+		
+	plt.show()
+
+	sns.set()
+	ax = plt.axes()
+	sns.heatmap(confusion_matrix, ax = ax, cmap="YlGnBu", yticklabels=index,xticklabels=small_index)
+	ax.set_title('Confusion Matrix for Uniformly Sampled Random Graphs')
+	plt.tight_layout()
+	plt.show()
+
+
 if __name__ == "__main__":
+	test_edge_imputation()
 	# G = random_graphs.barabasi_albert_model(500, 10)
 	# G2 = random_graphs.barabasi_albert_model(500, 10)
 	# G3 = random_graphs.erdos_renyi(500, 0.03)
@@ -334,7 +412,7 @@ if __name__ == "__main__":
 	# plot_graph_matching()
 	# test_edge_imputation()
 	# soft_clustering()
-	run_predict_structure()
+	#run_predict_structure()
 	#run_predict_structure(structural_identities.erdos_renyi_generator, 'Erdos Renyi')
 	# run_predict_structure(structural_identities.geometric_generator, 'Geometric')
 	# run_predict_structure(structural_identities.barabasi_albert_generator, 'Barabasi Albert')
