@@ -9,6 +9,8 @@ import structural_identities
 from collections import defaultdict
 from numpy.linalg import norm
 from copy import deepcopy
+import seaborn as sns
+
 
 
 def jdd(G):
@@ -204,46 +206,111 @@ def predict_structure(G, trials=20):
 	return difs, index
 
 
-def run_predict_structure(generator, title):
+def run_predict_structure(generator=None, title=None):
 	constraints = {'edge_count': (1000, 1100)}
 
 	accuracy_at_k = [0] * 5
-	samples = 100
-	for sample in xrange(samples):
-		G = structural_identities.constrained_generation(generator, constraints)
-		cluster, types = predict_structure(G, trials=20)
 
-		print sample, types[cluster.index(min(cluster))]
-	
-		array = np.array(cluster)
-		order = array.argsort()
-		ranks = order.argsort().tolist()
+	if generator != None and title != None:
+		samples = 100
+		for sample in xrange(samples):
+			G = structural_identities.constrained_generation(generator, constraints)
+			cluster, types = predict_structure(G, trials=20)
 
-		k = -1
-		for i in xrange(len(cluster)): # 5 types of rg
-			if title==types[ranks.index(i)]:
-				k = i
-				break
-
-		j = len(cluster)-1
-		while j >= k:
-			accuracy_at_k[j] += 1
-			j -= 1
-
-
-	plt.figure(1)
-
-	for i in xrange(len(accuracy_at_k)):
-		accuracy_at_k[i] /= (samples*1.0)
-
-	plt.plot([i for i in xrange(1, 6)], accuracy_at_k, marker='o')
-	plt.xlabel('k (top k labels)')
-	plt.ylim((0, 1.1))
-	plt.ylabel('Accuracy @ k')
-	plt.title('Prediction Accuracy for ' + title + ' Random Graphs')
+			print sample, types[cluster.index(min(cluster))]
 		
-	plt.show()
-	
+			array = np.array(cluster)
+			order = array.argsort()
+			ranks = order.argsort().tolist()
+
+			k = -1
+			for i in xrange(len(cluster)): # 5 types of rg
+				if title==types[ranks.index(i)]:
+					k = i
+					break
+
+			j = len(cluster)-1
+			while j >= k:
+				accuracy_at_k[j] += 1
+				j -= 1
+
+
+		plt.figure(1)
+
+		for i in xrange(len(accuracy_at_k)):
+			accuracy_at_k[i] /= (samples*1.0)
+
+		plt.plot([i for i in xrange(1, 6)], accuracy_at_k, marker='o')
+		plt.xlabel('k (top k labels)')
+		plt.ylim((0, 1.1))
+		plt.ylabel('Accuracy @ k')
+		plt.title('Prediction Accuracy for ' + title + ' Random Graphs')
+			
+		plt.show()
+
+	# Uniformly sample across rg
+	elif generator == None:
+		confusion_matrix = [[0 for i in xrange(5)] for j in xrange(5)]
+		samples = 100
+		index = ['Watts Strogatz', 'Geometric', 'Erdos Renyi', 'Barabasi Albert', 'Planted Partition Model']
+
+		rgs = [structural_identities.watts_strogatz_generator,
+			   structural_identities.geometric_generator,
+			   structural_identities.erdos_renyi_generator,
+			   structural_identities.barabasi_albert_generator,
+			   structural_identities.planted_partition_generator]
+
+
+		for j, rg in enumerate(rgs):
+			title = index[j]
+			actual = j
+			for i in xrange(samples):
+				G = structural_identities.constrained_generation(rg, constraints)
+				cluster, types = predict_structure(G, trials=5)
+
+				predicted = cluster.index(min(cluster))
+				print title, types[predicted]
+
+				confusion_matrix[actual][predicted] += 1
+
+				array = np.array(cluster)
+				order = array.argsort()
+				ranks = order.argsort().tolist()
+
+				k = -1
+				for i in xrange(len(cluster)): # 5 types of rg
+					if title==types[ranks.index(i)]:
+						k = i
+						break
+
+				j = len(cluster)-1
+				while j >= k:
+					accuracy_at_k[j] += 1
+					j -= 1
+
+		small_index = ['WS', 'Geo', 'ER', 'BA', 'PPM']
+
+
+		for i in xrange(len(accuracy_at_k)):
+			accuracy_at_k[i] /= (samples*1.0*len(rgs))
+
+		print accuracy_at_k
+
+		plt.plot([i for i in xrange(1, 6)], accuracy_at_k, marker='o')
+		plt.xlabel('k (top k labels)')
+		plt.ylim((0, 1.1))
+		plt.ylabel('Accuracy @ k')
+		plt.title('Prediction Accuracy for Uniformly Sampled Random Graphs')
+			
+		plt.show()
+
+		sns.set()
+		ax = plt.axes()
+		sns.heatmap(confusion_matrix, ax = ax, cmap="YlGnBu", yticklabels=index,xticklabels=small_index)
+		ax.set_title('Confusion Matrix for Uniformly Sampled Random Graphs')
+		plt.tight_layout()
+		plt.show()
+
 
 if __name__ == "__main__":
 	# G = random_graphs.barabasi_albert_model(500, 10)
@@ -255,7 +322,8 @@ if __name__ == "__main__":
 	# plot_graph_matching()
 	# test_edge_imputation()
 	# soft_clustering()
-	run_predict_structure(structural_identities.erdos_renyi_generator, 'Erdos Renyi')
+	run_predict_structure()
+	#run_predict_structure(structural_identities.erdos_renyi_generator, 'Erdos Renyi')
 	# run_predict_structure(structural_identities.geometric_generator, 'Geometric')
 	# run_predict_structure(structural_identities.barabasi_albert_generator, 'Barabasi Albert')
 	# run_predict_structure(structural_identities.planted_partition_generator, 'Planted Partition Model')
