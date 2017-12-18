@@ -169,7 +169,7 @@ def plot_graph_matching():
 
 
 # Pass in G
-def predict_structure(G, trials=20):
+def predict_structure(G, trials=20, constraints=False):
 	n = G.number_of_nodes()
 	e = G.number_of_edges()
 	rgs = [structural_identities.watts_strogatz_generator,
@@ -179,7 +179,15 @@ def predict_structure(G, trials=20):
 		   structural_identities.planted_partition_generator]
 	index = ['Watts Strogatz', 'Geometric', 'Erdos Renyi', 'Barabasi Albert', 'Planted Partition Model']
 
-	constraints = {'edge_count': (.75*e, 1.25*e)}
+	if not constraints:
+		constraints = {'edge_count': (.75*e, 1.25*e)}
+	else:
+		diam = graph_measures.diameter(G)
+		#md = graph_measures.mean_degree(G)
+		constraints = {'edge_count': (.75*e, 1.25*e),
+					   'diameter': (.1 * diam, 2*diam)}
+					   #'mean_degree':(.5*md, 1.5*md)}
+
 
 	difs = [0 for x in xrange(len(rgs))]
 	for _ in xrange(trials):
@@ -253,7 +261,7 @@ def run_predict_structure(generator=None, title=None):
 		confusion_matrix = [[0 for i in xrange(5)] for j in xrange(5)]
 		samples = 100
 		index = ['Watts Strogatz', 'Geometric', 'Erdos Renyi', 'Barabasi Albert', 'Planted Partition Model']
-
+		constraints_enforced=True
 		rgs = [structural_identities.watts_strogatz_generator,
 			   structural_identities.geometric_generator,
 			   structural_identities.erdos_renyi_generator,
@@ -266,7 +274,8 @@ def run_predict_structure(generator=None, title=None):
 			actual = j
 			for i in xrange(samples):
 				G = structural_identities.constrained_generation(rg, constraints)
-				cluster, types = predict_structure(G, trials=5)
+				
+				cluster, types = predict_structure(G, 5, constraints_enforced)
 
 				predicted = cluster.index(min(cluster))
 				print title, types[predicted]
@@ -296,7 +305,10 @@ def run_predict_structure(generator=None, title=None):
 
 		print accuracy_at_k
 
-		plt.plot([i for i in xrange(1, 6)], accuracy_at_k, marker='o')
+		if constraints_enforced:
+			plt.plot([i for i in xrange(1, 6)], accuracy_at_k, marker='o', color='red')
+		else:
+			plt.plot([i for i in xrange(1, 6)], accuracy_at_k, marker='o')
 		plt.xlabel('k (top k labels)')
 		plt.ylim((0, 1.1))
 		plt.ylabel('Accuracy @ k')
