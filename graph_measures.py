@@ -39,18 +39,22 @@ def hi_lo_centrality(centrality, G):
 
 # Diameter of largest component
 def diameter(G):
-	if connected_components_count(G) > 1:
-		nodes = max(nx.connected_components(G), key=len)
+	try:
+		if connected_components_count(G) > 1:
+			nodes = max(nx.connected_components(G), key=len)
 
-		new_G = nx.Graph()
+			new_G = nx.Graph()
 
-		for edge in G.edges():
-			if edge[0] in nodes and edge[1] in nodes:
-				new_G.add_edge(edge[0], edge[1])
+			for edge in G.edges():
+				if edge[0] in nodes and edge[1] in nodes:
+					new_G.add_edge(edge[0], edge[1])
 
-		G = new_G
+			G = new_G
 	
-	return nx.diameter(G)
+		return nx.diameter(G)
+		
+	except ValueError:
+		return 5
 
 
 def mean_degree(G):
