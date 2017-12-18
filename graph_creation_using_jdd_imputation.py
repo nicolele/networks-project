@@ -379,6 +379,8 @@ def test_edge_imputation():
 	small_index = ['WS', 'Geo', 'ER', 'BA', 'PPM']
 
 
+	plt.figure(10)
+
 	for i in xrange(len(accuracy_at_k)):
 		accuracy_at_k[i] /= (samples*1.0*len(rgs))
 
@@ -386,6 +388,7 @@ def test_edge_imputation():
 		plt.plot([i for i in xrange(1, 6)], accuracy_at_k, marker='o', color='red')
 	else:
 		plt.plot([i for i in xrange(1, 6)], accuracy_at_k, marker='o')
+	
 	plt.xlabel('k (top k labels)')
 	plt.ylim((0, 1.1))
 	plt.ylabel('Accuracy @ k')
@@ -399,6 +402,11 @@ def test_edge_imputation():
 	ax.set_title('Confusion Matrix for Uniformly Sampled Random Graphs')
 	plt.tight_layout()
 	plt.show()
+
+
+
+def perform_edge_imputation():
+	pass
 
 
 if __name__ == "__main__":
