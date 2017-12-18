@@ -1,15 +1,17 @@
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import operator
 import numpy as np
 import networkx as nx
 import random_graphs
 import graph_measures
-import edge_imputation
 import structural_identities
 from collections import defaultdict
 from numpy.linalg import norm
 from copy import deepcopy
-import seaborn as sns
+import seaborn.apionly as sns
+from data_processing import remove_edges
+import imp
 
 
 
@@ -406,11 +408,113 @@ def test_edge_imputation():
 
 
 def perform_edge_imputation():
-	pass
+	accuracy_at_removed = []
+	remove_probability = [0.1*i for i in xrange(10)]
+
+
+	constraints = {'edge_count': (1000, 1100)}
+
+	samples = 2
+	index = ['Watts Strogatz', 'Geometric', 'Erdos Renyi', 'Barabasi Albert', 'Planted Partition Model']
+	constraints_enforced=False
+	rgs = [structural_identities.watts_strogatz_generator,
+		   structural_identities.geometric_generator,
+		   structural_identities.erdos_renyi_generator,
+		   structural_identities.barabasi_albert_generator,
+		   structural_identities.planted_partition_generator]
+
+
+	for p in remove_probability:
+		correct = 0.0
+		accuracy_at_k = [0] * 5
+		confusion_matrix = [[0 for i in xrange(5)] for j in xrange(5)]
+
+		for uni, rg in enumerate(rgs):
+			title = index[uni]
+			actual = uni
+			for i in xrange(samples):
+				G = structural_identities.constrained_generation(rg, constraints)
+				
+				new_G = deepcopy(G)
+				new_G = remove_edges(new_G, p)
+				new_G = impute_edge_algorithm(new_G, G)
+
+				cluster, types = predict_structure(new_G, 1, constraints_enforced)
+
+				predicted = cluster.index(min(cluster))
+				print title, types[predicted]
+				if actual==predicted:
+					correct += 1
+
+				confusion_matrix[actual][predicted] += 1
+
+				array = np.array(cluster)
+				order = array.argsort()
+				ranks = order.argsort().tolist()
+
+				k = -1
+				for i in xrange(len(cluster)): # 5 types of rg
+					if title==types[ranks.index(i)]:
+						k = i
+						break
+
+				j = len(cluster)-1
+				while j >= k:
+					accuracy_at_k[j] += 1
+					j -= 1
+		small_index = ['WS', 'Geo', 'ER', 'BA', 'PPM']
+
+
+		plt.figure(10)
+
+		sns.set()
+		ax = plt.axes()
+		sns.heatmap(confusion_matrix, ax = ax, cmap="YlGnBu", yticklabels=index,xticklabels=small_index)
+		ax.set_title('Confusion Matrix for Edge Imputed Graphs (' + str((p)*100) + ' percent removed)')
+		plt.tight_layout()
+		plt.savefig('/Users/Brennan/Desktop/Networks/networks-project/pictures/CM_' + str((p)*100) + '_removed.png')
+		plt.close()
+
+		sns.reset_defaults()
+		imp.reload(mpl); imp.reload(plt); imp.reload(sns)
+		# import matplotlib as mpl
+		# import matplotlib.pyplot as plt
+
+		
+		for i in xrange(len(accuracy_at_k)):
+			accuracy_at_k[i] /= (samples*1.0*len(rgs))
+
+		if constraints_enforced:
+			plt.plot([i for i in xrange(1, 6)], accuracy_at_k, marker='o', color='red')
+		else:
+			plt.plot([i for i in xrange(1, 6)], accuracy_at_k, marker='o')
+		
+		plt.xlabel('k (top k labels)')
+		plt.ylim((0, 1.1))
+		plt.ylabel('Accuracy @ k')
+		plt.title('Prediction Accuracy for Edge Imputed Graphs (' + str((p)*100) + ' percent removed)')
+		plt.savefig('/Users/Brennan/Desktop/Networks/networks-project/pictures/PA_' + str((p)*100) + '_removed.png')
+		plt.tight_layout()
+		plt.close()
+
+		accuracy_at_removed.append(correct/(len(rgs) * samples))
+
+
+	plt.plot(remove_probability, accuracy_at_removed, marker='o')
+	plt.xlabel('Percent of Edges Removed')
+	plt.ylim((0, 1.1))
+	plt.ylabel('Accuracy @ 1')
+	plt.title('Prediction Accuracy for Graph Recovery (Edge Imputation)')
+	plt.savefig('/Users/Brennan/Desktop/Networks/networks-project/pictures/graph_imputation_forall_p.png')
+	plt.clf()
+
+
+
 
 
 if __name__ == "__main__":
-	test_edge_imputation()
+	perform_edge_imputation()
+	#test_edge_imputation()
 	# G = random_graphs.barabasi_albert_model(500, 10)
 	# G2 = random_graphs.barabasi_albert_model(500, 10)
 	# G3 = random_graphs.erdos_renyi(500, 0.03)
